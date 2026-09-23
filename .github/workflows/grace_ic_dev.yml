@@ -1,0 +1,63 @@
+name: GRACE IC development ceiling
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - grace-ic-ceiling-20260923
+    paths:
+      - GRACE_IC_FROZEN_PROTOCOL_2026-09-23.md
+      - grace_ic_dev.py
+      - requirements-grace-ic.txt
+      - .github/workflows/grace_ic_dev.yml
+
+concurrency:
+  group: grace-ic-ceiling-20260923
+  cancel-in-progress: true
+
+jobs:
+  development:
+    # Carrier is scientifically sealed at PROBE_COVERAGE_DEGENERATE.
+    # Keep the workflow definition for provenance, but prohibit any further execution.
+    if: ${{ false }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      HF_HUB_DISABLE_TELEMETRY: "1"
+      TOKENIZERS_PARALLELISM: "false"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      - name: Install CPU runtime
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch==2.0.1 --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements-grace-ic.txt
+
+      - name: Fetch frozen official GRACE
+        run: |
+          git clone https://github.com/Thartvigsen/GRACE.git GRACE
+          git -C GRACE checkout f674183f17a995d109e10ee6140d4c3e6d016115
+          test "$(git -C GRACE rev-parse HEAD)" = "f674183f17a995d109e10ee6140d4c3e6d016115"
+
+      - name: Static executor check
+        run: python -m py_compile grace_ic_dev.py
+
+      - name: Run development-only identification geometry
+        run: python grace_ic_dev.py --grace-repo GRACE --out results/grace_ic_dev.json
+
+      - name: Upload development result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: grace-ic-development
+          path: results/grace_ic_dev.json
+          if-no-files-found: warn
+          retention-days: 30

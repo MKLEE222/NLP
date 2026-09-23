@@ -20,6 +20,9 @@ concurrency:
 
 jobs:
   development:
+    # Carrier is scientifically sealed at PROBE_COVERAGE_DEGENERATE.
+    # Keep the workflow definition for provenance, but prohibit any further execution.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     env:

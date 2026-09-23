@@ -9,6 +9,7 @@ import os
 import random
 import subprocess
 import sys
+import types
 from pathlib import Path
 
 import numpy as np
@@ -77,6 +78,9 @@ def hadamard4(device, dtype):
 
 
 def load_grace_class(grace_repo: Path):
+    # grace.utils imports wandb, but this executor does not use logging;
+    # a module stub avoids pulling an unrelated runtime dependency.
+    sys.modules.setdefault("wandb", types.ModuleType("wandb"))
     sys.path.insert(0, str(grace_repo))
     src = grace_repo / "grace" / "editors" / "grace.py"
     spec = importlib.util.spec_from_file_location("grace_official_editor", src)
@@ -244,10 +248,11 @@ def main():
 
     api = HfApi()
     model_rev = api.model_info(MODEL_ID).sha
+    tokenizer_rev = api.model_info(TOKENIZER_ID).sha
     dataset_rev = api.dataset_info(DATASET_ID).sha
 
-    tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_ID)
-    model = AutoModelForSequenceClassification.from_pretrained(MODEL_ID).to(device)
+    tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_ID, revision=tokenizer_rev)
+    model = AutoModelForSequenceClassification.from_pretrained(MODEL_ID, revision=model_rev).to(device)
     model.eval()
 
     wrapped = WrappedModel(model, tokenizer)
@@ -601,6 +606,7 @@ def main():
         "dataset_id": DATASET_ID,
         "dataset_revision": dataset_rev,
         "tokenizer_id": TOKENIZER_ID,
+        "tokenizer_revision": tokenizer_rev,
         "seed": SEED,
         "target_keys": TARGET_KEYS,
         "anchor_successful_edits": successful_edits,

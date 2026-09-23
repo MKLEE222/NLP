@@ -1,0 +1,37 @@
+{
+  "seal": "GRACE_IC_CARRIER_STOPPED",
+  "date": "2026-09-23",
+  "branch": "grace-ic-ceiling-20260923",
+  "draft_pr": 1,
+  "frozen_protocol_path": "GRACE_IC_FROZEN_PROTOCOL_2026-09-23.md",
+  "frozen_protocol_git_blob_sha": "3767db513c2837bbf8393e42550774c6f86b5833",
+  "development_executor_path": "grace_ic_dev.py",
+  "development_executor_git_blob_sha": "3345d91e9a669a14f1f950469fa22b877ac8cf6c",
+  "development_run_id": 35809080372,
+  "development_run_head_sha": "871ffb9d12602c1930e4df944f2fc96433d269a4",
+  "development_run_conclusion": "success",
+  "development_artifact_id": 10729665956,
+  "development_artifact_zip_sha256": "795dba41df678869fea332ad3349ca9c64e362987268b9f26a11d9776751001a",
+  "development_json_sha256": "ba4a9e51a41071e90d0a4c28be0f9f8d0154f591dce45fbdaac52efdf20f871e",
+  "development_result": {
+    "status": "PROBE_COVERAGE_DEGENERATE",
+    "heldout_evaluated": false,
+    "covered_slots": [],
+    "role_hashes": {
+      "anchor_pool": "b9dae206c297cc932274f227fc353eb58977f9938f45d26a5964b06593e0e549",
+      "probe_pool": "698bdc833d1e84d3c19ccc128fc463cf325a64bdb8633878b63dea2c0b1edaf0",
+      "dev_pool": "9794ab4f705ed28ecacb8e6b515352eb5b9e58aafe6b24a0ca9048ca0069bf8a",
+      "heldout_pool": "5a6ac1ed789c3afdaaaa74db972a8d6ee0ed71a170b158b7ed4db24c9ad88e8a"
+    },
+    "model_revision": "e433c205659d2e25d8791f091c7485f82ccf06e1",
+    "dataset_revision": "438563911ffd4e427617780ef944e3061e3402bc",
+    "grace_commit": "f674183f17a995d109e10ee6140d4c3e6d016115"
+  },
+  "scientific_disposition": "The frozen GRACE carrier terminated at the preregistered PROBE_COVERAGE_DEGENERATE stop: the disjoint 256-example probe-candidate pool supplied no supported local probe for any of the four frozen memory slots. Therefore q_k, delayed higher-order visibility, and breadth-depth substitution were not estimated for this carrier.",
+  "heldout_authorized": false,
+  "heldout_consumed": false,
+  "rescue_authorized": false,
+  "next_carrier_authorized": false,
+  "claim_boundary": "This is a structural support/coverage boundary under the frozen fixed-topology GRACE value-state specialization, not evidence for either a nontrivial frontier or (1,1) closure. It does not license claims about discrete key-insertion differential geometry.",
+  "cross_carrier_reading": "The two completed LoRA carriers remain the only confirmatory real-carrier frontier results and both show first-order single-probe closure. GRACE does not contradict or extend that frontier empirically; instead it exposes a distinct routed-memory support boundary: under the frozen natural local-write definition, admissible probe coverage was too sparse to form the four-probe identification experiment."
+}

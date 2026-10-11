@@ -95,12 +95,23 @@ class SourceCompilerTests(unittest.TestCase):
         self.write_source("langgraph-admission",raw.replace("LEFT","t"))
         plan=synthesize(self.root,"langgraph-admission")
         self.assertEqual(plan["candidate_count"],2)
-        self.assertEqual(plan["runnable_count"],1)
+        self.assertEqual(plan["runnable_count"],2)
         self.assertEqual(plan["selected"][0]["comparison"],
                          "stored_object_vs_candidate_id")
         self.assertFalse(plan["selected"][0]["is_async"])
         self.assertEqual(plan["selected"][0]["injection"]["variants"],
                          ["same_logical_id","different_logical_id"])
+
+    def test_budget_two_selects_both_async_and_sync_source_edges(self):
+        raw=ADMISSION_TEMPLATE.replace("pending.items()","futures().items()")
+        self.write_source("langgraph-admission",raw.replace("LEFT","t"))
+        plan=synthesize(self.root,"langgraph-admission",budget=2)
+        self.assertEqual(plan["runnable_count"],2)
+        self.assertEqual(len(plan["selected"]),2)
+        self.assertEqual({x["function"] for x in plan["selected"]},
+                         {"_call","_acall"})
+        self.assertEqual({x["is_async"] for x in plan["selected"]},{True,False})
+        verify_pinned_source(self.root,plan)
 
     def test_langgraph_fixed_id_also_runnable(self):
         raw=ADMISSION_TEMPLATE.replace("pending.items()","futures().items()")

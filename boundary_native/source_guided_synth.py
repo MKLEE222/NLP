@@ -284,6 +284,15 @@ def verify_pinned_source(root:Path,plan:dict):
         raise ValueError("source escapes repository")
     if hashlib.sha256(source.read_bytes()).hexdigest()!=plan.get("source_sha256"):
         raise ValueError("source has drifted after planning")
+    # A source hash alone does not authenticate the scenario-selection logic.
+    # Re-derive the selected cases from pinned bytes, to reject tampered plans.
+    selected=plan.get("selected")
+    if not isinstance(selected,list) or not selected:
+        raise ValueError("empty/invalid selected cases")
+    regenerated=synthesize(root,profile,budget=len(selected))
+    for field in ("selected","candidate_count","runnable_count","search_space"):
+        if plan.get(field)!=regenerated[field]:
+            raise ValueError("scenario plan differs from source-derived selection: "+field)
 
 
 def main():

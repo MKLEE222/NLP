@@ -1,0 +1,723 @@
+{
+  "schema": "source_to_native_v1",
+  "date": "2026-10-11",
+  "run_id": 38115822774,
+  "workflow_url": "https://github.com/MKLEE222/NLP/actions/runs/38115822774",
+  "claims": "Six native historical source/fix versions; source-derived bounded plans with manually supported SDK adapters; NOT blind or novel bug discovery",
+  "n_distinct_upstream_issues": 3,
+  "n_source_versions": 6,
+  "n_frameworks": 2,
+  "compiler_unittests": 20,
+  "rows": [
+    {
+      "job_id": 114400392521,
+      "job_name": "genuine-upstream-boundary (langgraph-upstream, langchain-ai/langgraph, b2926a0ff9589c28c7e01fe7cd...",
+      "source_repo": "langchain-ai/langgraph",
+      "plan": {
+        "adapter": "langgraph-push-child",
+        "candidate_count": 2,
+        "profile": "langgraph-admission",
+        "rights_limit": "Supported adapter and normative contract supplied externally",
+        "runnable_count": 2,
+        "schema_version": 1,
+        "search_space": {
+          "top_level_function_count": 6,
+          "tracked_futures_id_comparisons": 2
+        },
+        "selected": [
+          {
+            "adapter": "langgraph-push-child",
+            "comparison": "stored_object_vs_candidate_id",
+            "contract": "same_inflight_logical_id_not_readmitted",
+            "eligible": true,
+            "function": "_call",
+            "injection": {
+              "pending_child": true,
+              "variants": [
+                "same_logical_id",
+                "different_logical_id"
+              ]
+            },
+            "is_async": false,
+            "kind": "inflight_logical_id_admission",
+            "negative_control": "different_id_remains_admissible",
+            "observation": [
+              "new_child_admissions"
+            ],
+            "source_file": "libs/langgraph/langgraph/pregel/_runner.py",
+            "source_line": 738
+          },
+          {
+            "adapter": "langgraph-push-child",
+            "comparison": "stored_object_vs_candidate_id",
+            "contract": "same_inflight_logical_id_not_readmitted",
+            "eligible": true,
+            "function": "_acall_impl",
+            "injection": {
+              "pending_child": true,
+              "variants": [
+                "same_logical_id",
+                "different_logical_id"
+              ]
+            },
+            "is_async": true,
+            "kind": "inflight_logical_id_admission",
+            "negative_control": "different_id_remains_admissible",
+            "observation": [
+              "new_child_admissions"
+            ],
+            "source_file": "libs/langgraph/langgraph/pregel/_runner.py",
+            "source_line": 885
+          }
+        ],
+        "soundness_limit": "AST local call reachability is not dynamic control-flow proof",
+        "source_file": "libs/langgraph/langgraph/pregel/_runner.py",
+        "source_sha256": "316cf133c724163a18ef279322615588b3fa8b96e359289a7cadea90f0df7622",
+        "status": "SCENARIO_PLAN_ONLY_NOT_EXECUTION",
+        "unselected_count": 0
+      },
+      "observed": {
+        "evidence_limit": "known-profile source-directed cases, not general arbitrary-source synthesis",
+        "generated_at_function": [
+          "_call",
+          "_acall_impl"
+        ],
+        "generated_at_line": [
+          738,
+          885
+        ],
+        "plan_status": "SCENARIO_PLAN_ONLY_NOT_EXECUTION",
+        "runtime_result": {
+          "executed_source_sites": 2,
+          "status": "FAIL",
+          "subcases": [
+            {
+              "different": {
+                "admissions": 1,
+                "original_future_pending": true,
+                "returned_future_pending": true,
+                "variant": "different_logical_id"
+              },
+              "reason": "duplicate_inflight_child_admitted",
+              "same": {
+                "admissions": 1,
+                "original_future_pending": true,
+                "returned_future_pending": true,
+                "variant": "same_logical_id"
+              },
+              "status": "FAIL"
+            },
+            {
+              "different": {
+                "admissions": 1,
+                "exception_type": null,
+                "original_future_pending": true,
+                "returned_future_pending": true,
+                "variant": "different_logical_id"
+              },
+              "reason": "duplicate_inflight_child_admitted",
+              "same": {
+                "admissions": 1,
+                "exception_type": null,
+                "original_future_pending": true,
+                "returned_future_pending": true,
+                "variant": "same_logical_id"
+              },
+              "status": "FAIL"
+            }
+          ]
+        },
+        "source_file": "libs/langgraph/langgraph/pregel/_runner.py",
+        "source_hint": [
+          "stored_object_vs_candidate_id",
+          "stored_object_vs_candidate_id"
+        ],
+        "source_profile": "langgraph-admission",
+        "source_sha256": "316cf133c724163a18ef279322615588b3fa8b96e359289a7cadea90f0df7622"
+      }
+    },
+    {
+      "job_id": 114400392530,
+      "job_name": "genuine-upstream-boundary (agents-old, openai/openai-agents-python, 683b6e79e5b4a2e3fc3cac80b5561...",
+      "source_repo": "openai/openai-agents-python",
+      "plan": {
+        "adapter": "openai-agents-sdk-guardrail",
+        "candidate_count": 1,
+        "profile": "agents-guardrail",
+        "rights_limit": "Supported adapter and normative contract supplied externally",
+        "runnable_count": 1,
+        "schema_version": 1,
+        "search_space": {
+          "broad_exception_handler_count": 8,
+          "final_output_writer_count": 2,
+          "top_level_function_count": 13
+        },
+        "selected": [
+          {
+            "adapter": "openai-agents-sdk-guardrail",
+            "contract": "raised_guardrail_must_not_accept_final",
+            "eligible": true,
+            "function": "_run_output_guardrails_for_stream",
+            "handler_exit": "return_empty_list",
+            "injection": {
+              "callback": "output_guardrail",
+              "variants": [
+                "pass",
+                "raise_RuntimeError"
+              ]
+            },
+            "kind": "exception_to_accepted_output",
+            "negative_control": "pass_guardrail_accepts_final",
+            "observation": [
+              "caught_exception",
+              "final_output_accepted"
+            ],
+            "sink_call_path": [
+              "_finalize_streamed_final_output",
+              "_run_output_guardrails_for_stream"
+            ],
+            "source_file": "src/agents/run_internal/run_loop.py",
+            "source_line": 386
+          }
+        ],
+        "soundness_limit": "AST local call reachability is not dynamic control-flow proof",
+        "source_file": "src/agents/run_internal/run_loop.py",
+        "source_sha256": "5451b2ca97fe8616c8ef824dda90b1bf61afa9b945596c2b113d30856cdaf3e0",
+        "status": "SCENARIO_PLAN_ONLY_NOT_EXECUTION",
+        "unselected_count": 0
+      },
+      "observed": {
+        "evidence_limit": "known-profile source-directed cases, not general arbitrary-source synthesis",
+        "generated_at_function": [
+          "_run_output_guardrails_for_stream"
+        ],
+        "generated_at_line": [
+          386
+        ],
+        "plan_status": "SCENARIO_PLAN_ONLY_NOT_EXECUTION",
+        "runtime_result": {
+          "executed_source_sites": 1,
+          "status": "FAIL",
+          "subcases": [
+            {
+              "control": {
+                "caught_exception": null,
+                "final_output_accepted": true,
+                "is_complete": true,
+                "variant": "pass"
+              },
+              "fault": {
+                "caught_exception": null,
+                "final_output_accepted": true,
+                "is_complete": true,
+                "variant": "raise_RuntimeError"
+              },
+              "reason": "exception_swallowed_or_output_accepted",
+              "status": "FAIL"
+            }
+          ]
+        },
+        "source_file": "src/agents/run_internal/run_loop.py",
+        "source_hint": [
+          "return_empty_list"
+        ],
+        "source_profile": "agents-guardrail",
+        "source_sha256": "5451b2ca97fe8616c8ef824dda90b1bf61afa9b945596c2b113d30856cdaf3e0"
+      }
+    },
+    {
+      "job_id": 114400392549,
+      "job_name": "genuine-upstream-boundary (agents-fixed, openai/openai-agents-python, 4a3d33e44fcd5051ff1b08f136c...",
+      "source_repo": "openai/openai-agents-python",
+      "plan": {
+        "adapter": "openai-agents-sdk-guardrail",
+        "candidate_count": 1,
+        "profile": "agents-guardrail",
+        "rights_limit": "Supported adapter and normative contract supplied externally",
+        "runnable_count": 1,
+        "schema_version": 1,
+        "search_space": {
+          "broad_exception_handler_count": 8,
+          "final_output_writer_count": 2,
+          "top_level_function_count": 13
+        },
+        "selected": [
+          {
+            "adapter": "openai-agents-sdk-guardrail",
+            "contract": "raised_guardrail_must_not_accept_final",
+            "eligible": true,
+            "function": "_run_output_guardrails_for_stream",
+            "handler_exit": "explicit_reraise",
+            "injection": {
+              "callback": "output_guardrail",
+              "variants": [
+                "pass",
+                "raise_RuntimeError"
+              ]
+            },
+            "kind": "exception_to_accepted_output",
+            "negative_control": "pass_guardrail_accepts_final",
+            "observation": [
+              "caught_exception",
+              "final_output_accepted"
+            ],
+            "sink_call_path": [
+              "_finalize_streamed_final_output",
+              "_run_output_guardrails_for_stream"
+            ],
+            "source_file": "src/agents/run_internal/run_loop.py",
+            "source_line": 386
+          }
+        ],
+        "soundness_limit": "AST local call reachability is not dynamic control-flow proof",
+        "source_file": "src/agents/run_internal/run_loop.py",
+        "source_sha256": "23306cfd1f928a4054bdfd70c3ef47195919deb87d2afa882a4de60cfbcbdda1",
+        "status": "SCENARIO_PLAN_ONLY_NOT_EXECUTION",
+        "unselected_count": 0
+      },
+      "observed": {
+        "evidence_limit": "known-profile source-directed cases, not general arbitrary-source synthesis",
+        "generated_at_function": [
+          "_run_output_guardrails_for_stream"
+        ],
+        "generated_at_line": [
+          386
+        ],
+        "plan_status": "SCENARIO_PLAN_ONLY_NOT_EXECUTION",
+        "runtime_result": {
+          "executed_source_sites": 1,
+          "status": "PASS",
+          "subcases": [
+            {
+              "control": {
+                "caught_exception": null,
+                "final_output_accepted": true,
+                "is_complete": true,
+                "variant": "pass"
+              },
+              "fault": {
+                "caught_exception": "RuntimeError",
+                "final_output_accepted": false,
+                "is_complete": true,
+                "variant": "raise_RuntimeError"
+              },
+              "reason": "exception_propagated_and_final_rejected",
+              "status": "PASS"
+            }
+          ]
+        },
+        "source_file": "src/agents/run_internal/run_loop.py",
+        "source_hint": [
+          "explicit_reraise"
+        ],
+        "source_profile": "agents-guardrail",
+        "source_sha256": "23306cfd1f928a4054bdfd70c3ef47195919deb87d2afa882a4de60cfbcbdda1"
+      }
+    },
+    {
+      "job_id": 114400392551,
+      "job_name": "genuine-upstream-boundary (approved-tool-fixed, openai/openai-agents-python, 9d894a9032e8d373f8b5...",
+      "source_repo": "openai/openai-agents-python",
+      "plan": {
+        "adapter": "openai-approved-tool-persistence",
+        "candidate_count": 1,
+        "profile": "agents-approved-persistence",
+        "rights_limit": "Supported adapter and normative contract supplied externally",
+        "runnable_count": 1,
+        "schema_version": 1,
+        "search_space": {
+          "resumed_persistence_functions": 1,
+          "top_level_function_count": 16
+        },
+        "selected": [
+          {
+            "adapter": "openai-approved-tool-persistence",
+            "contract": "approved_executed_tool_has_paired_persisted_output",
+            "eligible": true,
+            "function": "_finalize_streamed_final_output",
+            "injection": {
+              "callback": "output_guardrail",
+              "requires_approval": true,
+              "variants": [
+                "run_pass",
+                "streamed_pass",
+                "run_trip",
+                "streamed_trip"
+              ]
+            },
+            "kind": "approved_effect_before_guardrail_rejection",
+            "negative_control": "normal_and_streamed_without_tripwire",
+            "observation": [
+              "session_call_count",
+              "session_output_count",
+              "tool_executions",
+              "guardrail_status"
+            ],
+            "resumed_call_sites": 1,
+            "source_file": "src/agents/run_internal/run_loop.py",
+            "source_inferred_order": "resumed_save_before_guardrail",
+            "source_line": 442
+          }
+        ],
+        "soundness_limit": "AST local call reachability is not dynamic control-flow proof",
+        "source_file": "src/agents/run_internal/run_loop.py",
+        "source_sha256": "736e22a2142ca5b1d32425e3714aebc974019f7898d9680bb1cf9169eef8166a",
+        "status": "SCENARIO_PLAN_ONLY_NOT_EXECUTION",
+        "unselected_count": 0
+      },
+      "observed": {
+        "evidence_limit": "known-profile source-directed cases, not general arbitrary-source synthesis",
+        "generated_at_function": [
+          "_finalize_streamed_final_output"
+        ],
+        "generated_at_line": [
+          442
+        ],
+        "plan_status": "SCENARIO_PLAN_ONLY_NOT_EXECUTION",
+        "runtime_result": {
+          "executed_source_sites": 1,
+          "status": "PASS",
+          "subcases": [
+            {
+              "cases": [
+                {
+                  "call_ids": [
+                    "source-plan-call"
+                  ],
+                  "mode": "run",
+                  "output_ids": [
+                    "source-plan-call"
+                  ],
+                  "session_call_count": 1,
+                  "session_output_count": 1,
+                  "status": "ok",
+                  "tool_executions": 1,
+                  "tripwire": false,
+                  "variant": "run_pass"
+                },
+                {
+                  "call_ids": [
+                    "source-plan-call"
+                  ],
+                  "mode": "streamed",
+                  "output_ids": [
+                    "source-plan-call"
+                  ],
+                  "session_call_count": 1,
+                  "session_output_count": 1,
+                  "status": "ok",
+                  "tool_executions": 1,
+                  "tripwire": false,
+                  "variant": "streamed_pass"
+                },
+                {
+                  "call_ids": [
+                    "source-plan-call"
+                  ],
+                  "mode": "run",
+                  "output_ids": [
+                    "source-plan-call"
+                  ],
+                  "session_call_count": 1,
+                  "session_output_count": 1,
+                  "status": "blocked",
+                  "tool_executions": 1,
+                  "tripwire": true,
+                  "variant": "run_trip"
+                },
+                {
+                  "call_ids": [
+                    "source-plan-call"
+                  ],
+                  "mode": "streamed",
+                  "output_ids": [
+                    "source-plan-call"
+                  ],
+                  "session_call_count": 1,
+                  "session_output_count": 1,
+                  "status": "blocked",
+                  "tool_executions": 1,
+                  "tripwire": true,
+                  "variant": "streamed_trip"
+                }
+              ],
+              "reason": "approved_effect_persisted",
+              "status": "PASS"
+            }
+          ]
+        },
+        "source_file": "src/agents/run_internal/run_loop.py",
+        "source_hint": [
+          "resumed_save_before_guardrail"
+        ],
+        "source_profile": "agents-approved-persistence",
+        "source_sha256": "736e22a2142ca5b1d32425e3714aebc974019f7898d9680bb1cf9169eef8166a"
+      }
+    },
+    {
+      "job_id": 114400392552,
+      "job_name": "genuine-upstream-boundary (approved-tool-old, openai/openai-agents-python, 6e2095d918a3875ba367cc...",
+      "source_repo": "openai/openai-agents-python",
+      "plan": {
+        "adapter": "openai-approved-tool-persistence",
+        "candidate_count": 1,
+        "profile": "agents-approved-persistence",
+        "rights_limit": "Supported adapter and normative contract supplied externally",
+        "runnable_count": 1,
+        "schema_version": 1,
+        "search_space": {
+          "resumed_persistence_functions": 1,
+          "top_level_function_count": 16
+        },
+        "selected": [
+          {
+            "adapter": "openai-approved-tool-persistence",
+            "contract": "approved_executed_tool_has_paired_persisted_output",
+            "eligible": true,
+            "function": "_finalize_streamed_final_output",
+            "injection": {
+              "callback": "output_guardrail",
+              "requires_approval": true,
+              "variants": [
+                "run_pass",
+                "streamed_pass",
+                "run_trip",
+                "streamed_trip"
+              ]
+            },
+            "kind": "approved_effect_before_guardrail_rejection",
+            "negative_control": "normal_and_streamed_without_tripwire",
+            "observation": [
+              "session_call_count",
+              "session_output_count",
+              "tool_executions",
+              "guardrail_status"
+            ],
+            "resumed_call_sites": 1,
+            "source_file": "src/agents/run_internal/run_loop.py",
+            "source_inferred_order": "resumed_guardrail_may_precede_save",
+            "source_line": 436
+          }
+        ],
+        "soundness_limit": "AST local call reachability is not dynamic control-flow proof",
+        "source_file": "src/agents/run_internal/run_loop.py",
+        "source_sha256": "8d5e7ac4be6415331d801463230cc562451d1700625bc2d21cd11eb139f9ad70",
+        "status": "SCENARIO_PLAN_ONLY_NOT_EXECUTION",
+        "unselected_count": 0
+      },
+      "observed": {
+        "evidence_limit": "known-profile source-directed cases, not general arbitrary-source synthesis",
+        "generated_at_function": [
+          "_finalize_streamed_final_output"
+        ],
+        "generated_at_line": [
+          436
+        ],
+        "plan_status": "SCENARIO_PLAN_ONLY_NOT_EXECUTION",
+        "runtime_result": {
+          "executed_source_sites": 1,
+          "status": "FAIL",
+          "subcases": [
+            {
+              "cases": [
+                {
+                  "call_ids": [
+                    "source-plan-call"
+                  ],
+                  "mode": "run",
+                  "output_ids": [
+                    "source-plan-call"
+                  ],
+                  "session_call_count": 1,
+                  "session_output_count": 1,
+                  "status": "ok",
+                  "tool_executions": 1,
+                  "tripwire": false,
+                  "variant": "run_pass"
+                },
+                {
+                  "call_ids": [
+                    "source-plan-call"
+                  ],
+                  "mode": "streamed",
+                  "output_ids": [
+                    "source-plan-call"
+                  ],
+                  "session_call_count": 1,
+                  "session_output_count": 1,
+                  "status": "ok",
+                  "tool_executions": 1,
+                  "tripwire": false,
+                  "variant": "streamed_pass"
+                },
+                {
+                  "call_ids": [
+                    "source-plan-call"
+                  ],
+                  "mode": "run",
+                  "output_ids": [
+                    "source-plan-call"
+                  ],
+                  "session_call_count": 1,
+                  "session_output_count": 1,
+                  "status": "blocked",
+                  "tool_executions": 1,
+                  "tripwire": true,
+                  "variant": "run_trip"
+                },
+                {
+                  "call_ids": [
+                    "source-plan-call"
+                  ],
+                  "mode": "streamed",
+                  "output_ids": [],
+                  "session_call_count": 1,
+                  "session_output_count": 0,
+                  "status": "blocked",
+                  "tool_executions": 1,
+                  "tripwire": true,
+                  "variant": "streamed_trip"
+                }
+              ],
+              "reason": "streamed:True:persisted_call_result_mismatch",
+              "status": "FAIL"
+            }
+          ]
+        },
+        "source_file": "src/agents/run_internal/run_loop.py",
+        "source_hint": [
+          "resumed_guardrail_may_precede_save"
+        ],
+        "source_profile": "agents-approved-persistence",
+        "source_sha256": "8d5e7ac4be6415331d801463230cc562451d1700625bc2d21cd11eb139f9ad70"
+      }
+    },
+    {
+      "job_id": 114400392582,
+      "job_name": "genuine-upstream-boundary (langgraph-community-patch, HUAN2022A/langgraph, e0d4ecf9cd5c5bd5a731d7...",
+      "source_repo": "HUAN2022A/langgraph",
+      "plan": {
+        "adapter": "langgraph-push-child",
+        "candidate_count": 2,
+        "profile": "langgraph-admission",
+        "rights_limit": "Supported adapter and normative contract supplied externally",
+        "runnable_count": 2,
+        "schema_version": 1,
+        "search_space": {
+          "top_level_function_count": 6,
+          "tracked_futures_id_comparisons": 2
+        },
+        "selected": [
+          {
+            "adapter": "langgraph-push-child",
+            "comparison": "stored_id_vs_candidate_id",
+            "contract": "same_inflight_logical_id_not_readmitted",
+            "eligible": true,
+            "function": "_call",
+            "injection": {
+              "pending_child": true,
+              "variants": [
+                "same_logical_id",
+                "different_logical_id"
+              ]
+            },
+            "is_async": false,
+            "kind": "inflight_logical_id_admission",
+            "negative_control": "different_id_remains_admissible",
+            "observation": [
+              "new_child_admissions"
+            ],
+            "source_file": "libs/langgraph/langgraph/pregel/_runner.py",
+            "source_line": 738
+          },
+          {
+            "adapter": "langgraph-push-child",
+            "comparison": "stored_id_vs_candidate_id",
+            "contract": "same_inflight_logical_id_not_readmitted",
+            "eligible": true,
+            "function": "_acall_impl",
+            "injection": {
+              "pending_child": true,
+              "variants": [
+                "same_logical_id",
+                "different_logical_id"
+              ]
+            },
+            "is_async": true,
+            "kind": "inflight_logical_id_admission",
+            "negative_control": "different_id_remains_admissible",
+            "observation": [
+              "new_child_admissions"
+            ],
+            "source_file": "libs/langgraph/langgraph/pregel/_runner.py",
+            "source_line": 885
+          }
+        ],
+        "soundness_limit": "AST local call reachability is not dynamic control-flow proof",
+        "source_file": "libs/langgraph/langgraph/pregel/_runner.py",
+        "source_sha256": "86d57dd543635c9b91e212f8eeb5b74571e2f1828a64f3d2d47b31f54c651f64",
+        "status": "SCENARIO_PLAN_ONLY_NOT_EXECUTION",
+        "unselected_count": 0
+      },
+      "observed": {
+        "evidence_limit": "known-profile source-directed cases, not general arbitrary-source synthesis",
+        "generated_at_function": [
+          "_call",
+          "_acall_impl"
+        ],
+        "generated_at_line": [
+          738,
+          885
+        ],
+        "plan_status": "SCENARIO_PLAN_ONLY_NOT_EXECUTION",
+        "runtime_result": {
+          "executed_source_sites": 2,
+          "status": "PASS",
+          "subcases": [
+            {
+              "different": {
+                "admissions": 1,
+                "original_future_pending": true,
+                "returned_future_pending": true,
+                "variant": "different_logical_id"
+              },
+              "reason": "pending_child_reused",
+              "same": {
+                "admissions": 0,
+                "original_future_pending": true,
+                "returned_future_pending": true,
+                "variant": "same_logical_id"
+              },
+              "status": "PASS"
+            },
+            {
+              "different": {
+                "admissions": 1,
+                "exception_type": null,
+                "original_future_pending": true,
+                "returned_future_pending": true,
+                "variant": "different_logical_id"
+              },
+              "reason": "pending_child_reused",
+              "same": {
+                "admissions": 0,
+                "exception_type": null,
+                "original_future_pending": true,
+                "returned_future_pending": true,
+                "variant": "same_logical_id"
+              },
+              "status": "PASS"
+            }
+          ]
+        },
+        "source_file": "libs/langgraph/langgraph/pregel/_runner.py",
+        "source_hint": [
+          "stored_id_vs_candidate_id",
+          "stored_id_vs_candidate_id"
+        ],
+        "source_profile": "langgraph-admission",
+        "source_sha256": "86d57dd543635c9b91e212f8eeb5b74571e2f1828a64f3d2d47b31f54c651f64"
+      }
+    }
+  ]
+}

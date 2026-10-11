@@ -184,6 +184,76 @@ def _unsafe_await_to_discharges(producer: ast.AsyncFunctionDef):
     return windows
 
 
+def _task_admission_windows(tree, digest):
+    """Generate tests at logical-ID dedup gates, independent of SDK paths.
+
+    This recognizes an existing collection of pending tasks and an attempted
+    scheduled task compared by logical ID. Both object-vs-ID (potential risk)
+    and ID-vs-ID (intended safe comparison) generate a paired same/different-ID
+    *test plan*. Actual correctness requires native dispatch and contract.
+    """
+    windows=[]
+    for fn in _functions(tree):
+        for generator in ast.walk(fn):
+            if not isinstance(generator,(ast.GeneratorExp,ast.ListComp)):
+                continue
+            for comp in generator.generators:
+                # A collection of (future, task)-like entries.
+                if not isinstance(comp.target,ast.Tuple) or len(comp.target.elts)!=2:
+                    continue
+                stored=comp.target.elts[1]
+                if not isinstance(stored,ast.Name):
+                    continue
+                iterable=ast.unparse(comp.iter)
+                if ".items()" not in iterable:
+                    continue
+                for guard in comp.ifs:
+                    for cmp in ast.walk(guard):
+                        if not isinstance(cmp,ast.Compare) or len(cmp.ops)!=1:
+                            continue
+                        if not isinstance(cmp.ops[0],(ast.Eq,ast.Is)):
+                            continue
+                        if len(cmp.comparators)!=1:
+                            continue
+                        rhs=cmp.comparators[0]
+                        if not (isinstance(rhs,ast.Attribute) and rhs.attr=="id"):
+                            continue
+                        left=cmp.left
+                        if isinstance(left,ast.Name) and left.id==stored.id:
+                            existing_projection="object"
+                        elif (isinstance(left,ast.Attribute) and left.attr=="id" and
+                              isinstance(left.value,ast.Name) and left.value.id==stored.id):
+                            existing_projection="id"
+                        else:
+                            continue
+                        # Require enclosing scheduling logic, not arbitrary
+                        # cache-key comparison in unrelated collection traversal.
+                        calls={x.func.id if isinstance(x.func,ast.Name) else x.func.attr
+                               for x in ast.walk(fn) if isinstance(x,ast.Call)
+                               if isinstance(x.func,(ast.Name,ast.Attribute))}
+                        if "schedule_task" not in calls:
+                            continue
+                        windows.append({
+                            "source_sha256":digest,
+                            "caller":fn.name,
+                            "source_obligation":"inflight_logical_task_not_reissued",
+                            "guard_at_line":cmp.lineno,
+                            "stored_task_identifier":stored.id,
+                            "attempted_identifier":ast.unparse(rhs),
+                            "existing_projection":existing_projection,
+                            "pending_collection":iterable,
+                            "fault":"retry_with_same_logical_task_id",
+                            "normal_control":"retry_with_distinct_logical_task_id",
+                            "required_runtime_check":"count_extra_pending_id_admissions",
+                            "static_status":"TEST_PLAN_ONLY",
+                        })
+    return sorted(
+        { (w["caller"],w["guard_at_line"],w["existing_projection"]):w
+         for w in windows}.values(),
+        key=lambda x:(x["caller"],x["guard_at_line"],x["existing_projection"]),
+    )
+
+
 def compile_source(source: str, *, path: str="<source>") -> dict:
     raw=source.encode("utf-8")
     digest=hashlib.sha256(raw).hexdigest()
@@ -221,15 +291,22 @@ def compile_source(source: str, *, path: str="<source>") -> dict:
              w.queue_producer_name,w.queue_consumer_name):w for w in findings}
     ordered=sorted(unique.values(),key=lambda w:(
         w.caller,w.spawned_at_line,w.await_at_line,w.discharge_at_line,w.producer))
+    source_windows=[asdict(x) for x in ordered]
+    source_windows.extend(_task_admission_windows(tree,digest))
+    source_windows=sorted(source_windows,key=lambda x:(
+        x["caller"],x["source_obligation"],
+        x.get("spawned_at_line",x.get("guard_at_line",0)),
+        x.get("await_at_line",0),
+    ))
     return {
-        "schema":"obligation_window_ast_v0",
+        "schema":"obligation_window_ast_v1",
         "source":path,
         "source_sha256":digest,
         "status":"SOURCE_TEST_PLAN_NOT_EXECUTED",
-        "candidate_windows":[asdict(x) for x in ordered],
-        "candidate_count":len(ordered),
+        "candidate_windows":source_windows,
+        "candidate_count":len(source_windows),
         "unmatched_pre_discharge_awaits":max(0,considered-len(ordered)),
-        "limit":"Only nested async producers and explicit positional/keyword create_task(queue) aliases",
+        "limit":"Only nested async queue producer windows and task collection ID-comparison gates",
     }
 
 
@@ -244,12 +321,15 @@ def choose_by_obligation(windows:list[dict],budget:int):
         raise ValueError("negative budget")
     covered=set()
     pending=list(sorted(windows,key=lambda x:(
-        x["caller"],x["spawned_at_line"],x["await_at_line"])))
+        x["caller"],x["source_obligation"],
+        x.get("spawned_at_line",x.get("guard_at_line",0)),
+        x.get("await_at_line",0))))
     result=[]
     while len(result)<budget and pending:
         scored=[]
         for item in pending:
-            key=(item["caller"],item["queue_consumer_name"],item["source_obligation"])
+            key=(item["caller"],item.get("queue_consumer_name",item.get("stored_task_identifier")),
+                 item["source_obligation"])
             novelty=int(key not in covered)
             scored.append((novelty,item))
         best=max(s for s,_ in scored)
@@ -257,7 +337,9 @@ def choose_by_obligation(windows:list[dict],budget:int):
             break
         winner=next(item for novelty,item in scored if novelty==best)
         result.append(winner)
-        covered.add((winner["caller"],winner["queue_consumer_name"],winner["source_obligation"]))
+        covered.add((winner["caller"],
+                     winner.get("queue_consumer_name",winner.get("stored_task_identifier")),
+                     winner["source_obligation"]))
         pending.remove(winner)
     return result
 
@@ -286,8 +368,12 @@ def main():
     print("OBLIGATION_WINDOW_SOURCE",json.dumps({
         "candidate_count":result["candidate_count"],
         "selected":len(result["selected"]),
-        "window_sources":[(x["caller"],x["producer"],x["await_at_line"],
-                           x["discharge_at_line"]) for x in result["selected"]],
+        "window_sources":[
+            (x["caller"], x["source_obligation"],
+             x.get("producer",x.get("stored_task_identifier")),
+             x.get("await_at_line",x.get("guard_at_line")),
+             x.get("discharge_at_line"))
+            for x in result["selected"]],
         "source_sha256":result["source_sha256"],
         "status":result["status"],
     },sort_keys=True))

@@ -169,7 +169,7 @@ def _scan_admission(tree, relpath):
                             "observation":["new_child_admissions"],
                             "negative_control":"different_id_remains_admissible",
                             "contract":"same_inflight_logical_id_not_readmitted",
-                            "eligible":not isinstance(fn,ast.AsyncFunctionDef),
+                            "eligible":True,  # adapter supports both synchronous and async runner boundaries
                         })
     return {"search_space":{"top_level_function_count":len(funcs),
                             "tracked_futures_id_comparisons":comparisons},

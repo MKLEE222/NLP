@@ -100,7 +100,7 @@ jobs:
           mkdir -p source_guided_receipts
           python boundary_native/source_guided_synth.py \
             --upstream-root upstream --profile ${{ matrix.profile }} \
-            --budget 1 \
+            --budget 2 \
             --output source_guided_receipts/plan_${{ matrix.label }}.json
       - name: Execute selected candidate on original SDK source
         run: |
@@ -129,7 +129,8 @@ jobs:
             "externally_registered_before_fix_expected":expected,
             "search_space":plan["search_space"],
           })
-          if got!=expected or len(plan["selected"])!=1:
+          expected_sites = 2 if plan["profile"] == "langgraph-admission" else 1
+          if got!=expected or len(plan["selected"])!=expected_sites:
             raise SystemExit("unexpected native failure-boundary evaluation")
           PY
       - name: Preserve raw source plan, runtime observation and environment

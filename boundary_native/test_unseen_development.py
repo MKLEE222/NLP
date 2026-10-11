@@ -14,7 +14,7 @@ async def consumer():
     stream=asyncio.Queue()
     async def child_producer(stream_queue):
         result = await asyncio.gather(slow_tool())
-        stream.put_nowait(None)
+        stream_queue.put_nowait(None)
         return result
     task = asyncio.create_task(child_producer(stream))
     while True:
@@ -31,7 +31,7 @@ async def consumer():
         try:
             result = await asyncio.gather(slow_tool())
         finally:
-            stream.put_nowait(None)
+            stream_queue.put_nowait(None)
         return result
     task = asyncio.create_task(child_producer(stream))
     while True:

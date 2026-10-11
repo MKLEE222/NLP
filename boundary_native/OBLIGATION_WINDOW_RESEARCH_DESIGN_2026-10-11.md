@@ -1,6 +1,8 @@
 # Obligation-Window Research Design — after studying TOSEM, FSE, ASE, ISSTA and TSE standards
 
-Date: 2026-10-11. Research status: executable V0 and a falsifiable *own-method hypothesis*, not independent novelty or paper-grade validation. This branch inherits the already frozen 16-issue registry; 12 confirmation issue bodies, code fixes, and outcomes stay sealed. Prior OACR, BRFP and neural-identifiability projects are conceptually separate.
+Date: 2026-10-11. Research status: executable V1 (two source obligation types) and a falsifiable *own-method hypothesis*, not independent novelty or paper-grade validation.
+
+**HIGH PRIORITY / READ FIRST:** [Direct-neighbor LDFI/Sieve/SOSP red-team](DIRECT_NEIGHBOR_LDFI_SIEVE_REDTEAM_2026-10-11.md): SIGMOD 2015 lineage-driven fault injection already uses provenance to choose fault sets, OSDI 2022 Sieve already derives fault plans from normal traces and checks safety/liveness through differential controls, and SOSP 2024 advances fault-induced failure reproduction. Our proposed interruption-window *idea is substantially overlapping*, and we have NOT demonstrated a distinct capability or competitive gain. This dominates generic novelty comparisons against FRIES/FailMapper. This branch inherits the already frozen 16-issue registry; 12 confirmation issue bodies, code fixes, and outcomes stay sealed. Prior OACR, BRFP and neural-identifiability projects are conceptually separate.
 
 ## 1. Strong real prior work — technical content rather than titles
 

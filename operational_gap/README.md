@@ -18,3 +18,13 @@ Worst-case consequence reconstruction error given observations with noise <= eps
 5. If no naturally occurring, cost-matched difference survives untouched confirmation, drop the operational innovation claim.
 
 Run the public fixtures with `python -m unittest discover -s operational_gap/tests -v`. Passing fixtures does not confirm the real-world hypothesis.
+
+## Research status and scope correction (2026-10-11)
+
+- **The scientific question is not QAEdit-specific.** It concerns the decision sufficiency of legal, non-destructive pre-action observations for predicting consequences of persistent state updates. No new mathematical theorem or model-editing method is yet established.
+- **Near-neighbor veto is active.** PSR, bisimulation, ACL 2025 QAEdit/WILD, ACL 2026 uncertainty-based editing diagnosis, and ICML 2026 StableEdit must be overcome as concrete theoretical and empirical alternatives.
+- **The first QAEdit carrier is blocked**, not disproven: actual Qwen2.5-0.5B LoRA produced 0/8 WILD-aligned correct edits on precommitted development records. The untouched confirmation remains unopened. New published-editor arm requires separately registered eligibility and cost gates.
+- **A second domain is only a transfer candidate**, not a new result: publicly established visual continual learning such as CORe50/CLEAR, after verifying an executable update method and independent task consequences.
+- No journal or venue selected; no private manuscript material mirrored into this public harness.
+
+See [Scientific scope and novelty gate](SCIENTIFIC_SCOPE_AND_NOVELTY_GATE_2026-10-11.md), [Published editor feasibility audit](PUBLISHED_EDITOR_ARM_FEASIBILITY_2026-10-11.md), and [QAEdit Gate A receipt](studies/qaedit_future_collision/GATE_A_RECEIPT_2026-10-11.md).

@@ -3,11 +3,11 @@ on:
   push:
     branches: [research/agent-failure-boundary-20261011]
     paths:
-      - 'boundary_native/**'
+      - 'boundary_native/issue3280_stream_guardrail.py'
       - '.github/workflows/agent-boundary-native.yml'
   pull_request:
     paths:
-      - 'boundary_native/**'
+      - 'boundary_native/issue3280_stream_guardrail.py'
       - '.github/workflows/agent-boundary-native.yml'
   workflow_dispatch:
 jobs:

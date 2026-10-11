@@ -219,33 +219,123 @@ def _run_langgraph(candidate):
     }
 
 
+async def _langgraph_async_case(same):
+    from langgraph._internal._constants import CONF, CONFIG_KEY_SCRATCHPAD
+    from langgraph.pregel._runner import _acall_impl
+
+    class Task:
+        pass
+    class Map(dict):
+        pass
+    class Scratch:
+        def __init__(self):
+            self.i=0
+        def call_counter(self):
+            self.i+=1
+            return self.i
+
+    loop=asyncio.get_running_loop()
+    parent=Task()
+    parent.id="parent-logical"
+    parent.config={CONF:{CONFIG_KEY_SCRATCHPAD:Scratch()}}
+    existing=Task()
+    existing.id="logical-child-A"
+    existing.name="old-child"
+    existing.writes=[]
+    next_child=Task()
+    next_child.id="logical-child-A" if same else "independent-child-B"
+    next_child.name="next-child"
+    next_child.writes=[]
+    pending=Map()
+    previous=loop.create_future()
+    pending[previous]=existing
+    destination=loop.create_future()
+    admitted=[]
+
+    async def schedule_task(parent_task,counter,call):
+        return next_child
+
+    def submit(*args,**kwargs):
+        admitted.append(next_child.id)
+        return loop.create_future()
+
+    await _acall_impl(
+        destination,weakref.ref(parent),lambda _:None,None,
+        futures=weakref.ref(pending),schedule_task=schedule_task,
+        submit=weakref.ref(submit),loop=loop)
+    err_type=None
+    if destination.done():
+        try:
+            destination.result()
+        except BaseException as e:
+            err_type=type(e).__name__
+    return {
+        "variant":"same_logical_id" if same else "different_logical_id",
+        "original_future_pending":not previous.done(),
+        "admissions":len(admitted),
+        "returned_future_pending":not destination.done(),
+        "exception_type":err_type,
+    }
+
+
+async def _run_langgraph_async(candidate):
+    variants=candidate["injection"]["variants"]
+    if variants!=["same_logical_id","different_logical_id"]:
+        raise ValueError("bad async admission source plan")
+    same=await _langgraph_async_case(True)
+    different=await _langgraph_async_case(False)
+    if not (same["original_future_pending"] and different["original_future_pending"]
+            and different["admissions"]==1
+            and same["exception_type"] is None and different["exception_type"] is None):
+        return {"status":"UNKNOWN","reason":"invalid_async_negative_control",
+                "same":same,"different":different}
+    violation=same["admissions"]>0
+    return {"status":"FAIL" if violation else "PASS",
+            "reason":"duplicate_inflight_child_admitted" if violation else "pending_child_reused",
+            "same":same,"different":different}
+
+
 def run(root:Path,plan:dict):
     verify_pinned_source(root,plan)
     selected=plan["selected"]
-    if len(selected)!=1:
-        raise ValueError("one source-justified scenario required")
-    case=selected[0]
-    if not case.get("eligible") or case["adapter"]!=plan["adapter"]:
-        raise ValueError("unsupported/invalid case")
+    if not selected or len(selected)>2:
+        raise ValueError("one or two pinned source scenarios required")
+    if any(not x.get("eligible") or x["adapter"]!=plan["adapter"] for x in selected):
+        raise ValueError("unsupported/invalid generated case")
     if plan["profile"]=="agents-guardrail":
+        if len(selected)!=1:
+            raise ValueError("guardrail adapter only admits one test")
         sys.path.insert(0,str(root.resolve()))
-        outcome=asyncio.run(_run_agents(case))
+        outcomes=[asyncio.run(_run_agents(selected[0]))]
     elif plan["profile"]=="agents-approved-persistence":
+        if len(selected)!=1:
+            raise ValueError("approval adapter only admits one test")
         sys.path.insert(0,str(root.resolve()))
-        outcome=asyncio.run(_run_approved(case))
+        outcomes=[asyncio.run(_run_approved(selected[0]))]
     else:
         sys.path.insert(0,str(root.resolve()/"libs"/"langgraph"))
-        outcome=_run_langgraph(case)
+        outcomes=[]
+        for case in selected:
+            if case["is_async"]:
+                outcomes.append(asyncio.run(_run_langgraph_async(case)))
+            else:
+                outcomes.append(_run_langgraph(case))
+    statuses=[x["status"] for x in outcomes]
+    total_status=("UNKNOWN" if "UNKNOWN" in statuses
+                  else "FAIL" if "FAIL" in statuses else "PASS")
     return {
         "source_profile":plan["profile"],
         "source_file":plan["source_file"],
         "source_sha256":plan["source_sha256"],
-        "generated_at_function":case["function"],
-        "generated_at_line":case["source_line"],
-        "source_hint":case.get("handler_exit",case.get("comparison")),
+        "generated_at_function":[x["function"] for x in selected],
+        "generated_at_line":[x["source_line"] for x in selected],
+        "source_hint":[x.get("handler_exit",x.get("comparison",x.get("source_inferred_order")))
+                       for x in selected],
         "plan_status":plan["status"],
-        "runtime_result":outcome,
-        "evidence_limit":"one generated known-profile native scenario, not unrestricted source-to-test synthesis",
+        "runtime_result":{"status":total_status,
+                          "subcases":outcomes,
+                          "executed_source_sites":len(outcomes)},
+        "evidence_limit":"known-profile source-directed cases, not general arbitrary-source synthesis",
     }
 
 

@@ -76,7 +76,67 @@ VARIANTS=[
 ]
 
 
+LOGICAL_TASK="""\
+def _call(futures):
+    next_task = schedule_task()
+    old = next(
+        (f for f, t in list(futures().items())
+         if t is not None and t == next_task.id),
+        None,
+    )
+    return old
+
+async def _acall_impl(futures):
+    next_task = await schedule_task()
+    old = next(
+        (f for f, t in list(futures().items())
+         if t is not None and t == next_task.id),
+        None,
+    )
+    return old
+"""
+
+LOGICAL_TASK_FIXED=LOGICAL_TASK.replace(
+    "t == next_task.id", "t.id == next_task.id"
+)
+
 class GenericWindowMethod(unittest.TestCase):
+    def test_both_sync_and_async_logical_task_gate(self):
+        p=compile_source(LOGICAL_TASK,path="task.py")
+        self.assertEqual(p["candidate_count"],2)
+        self.assertEqual({x["source_obligation"] for x in p["candidate_windows"]},
+                         {"inflight_logical_task_not_reissued"})
+        self.assertEqual({x["existing_projection"] for x in p["candidate_windows"]},
+                         {"object"})
+        self.assertEqual({x["caller"] for x in p["candidate_windows"]},
+                         {"_call","_acall_impl"})
+        self.assertEqual(len(choose_by_obligation(p["candidate_windows"],2)),2)
+        verify_source_plan(LOGICAL_TASK,p)
+
+    def test_repaired_task_identity_still_generates_same_test(self):
+        old=compile_source(LOGICAL_TASK)["candidate_windows"]
+        repaired=compile_source(LOGICAL_TASK_FIXED)["candidate_windows"]
+        self.assertEqual(len(old),len(repaired))
+        self.assertEqual([x["fault"] for x in old],[x["fault"] for x in repaired])
+        self.assertEqual({x["existing_projection"] for x in repaired},{"id"})
+        self.assertEqual({x["normal_control"] for x in repaired},
+                         {"retry_with_distinct_logical_task_id"})
+
+    def test_task_id_must_refer_to_pending_task(self):
+        s=LOGICAL_TASK.replace("t == next_task.id","unrelated == next_task.id")
+        self.assertEqual(compile_source(s)["candidate_count"],0)
+
+    def test_task_gate_must_be_in_scheduling_context(self):
+        s=LOGICAL_TASK.replace("schedule_task()","cached_lookup()")
+        self.assertEqual(compile_source(s)["candidate_count"],0)
+
+    def test_task_source_plan_is_recomputed_not_trusted(self):
+        p=compile_source(LOGICAL_TASK)
+        edited=copy.deepcopy(p)
+        edited["candidate_windows"][0]["existing_projection"]="id"
+        with self.assertRaisesRegex(ValueError,"not independently reproduced"):
+            verify_source_plan(LOGICAL_TASK,edited)
+
     def test_curated_counterexample_corpus(self):
         outputs=[]
         for name,src,expected in VARIANTS:

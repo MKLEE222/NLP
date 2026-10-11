@@ -43,7 +43,7 @@ async def _run_variant(cancel_inflight: bool, timeout: float):
         model_info={"function_calling":True,"vision":False,"json_output":False,
                     "family":ModelFamily.GPT_4O,"structured_output":False},
     )
-    agent=AssistantAgent("native-cancel-fixture",model_client=client,
+    agent=AssistantAgent("native_cancel_fixture",model_client=client,
                          tools=[fixture_tool],reflect_on_tool_use=False)
     token=CancellationToken()
     events=[]

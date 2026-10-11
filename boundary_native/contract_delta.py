@@ -210,6 +210,26 @@ def source_to_obligation_plans(
     }
 
 
+def verify_contract_plan(
+    source: str, plan: dict, *, catalog: dict,
+    supported_adapters: dict,
+) -> None:
+    """Recompute the entire manifest, including its source and policy hashes.
+
+    Adapter authorization and contract definitions must not change between
+    generation and execution. This is a reproducibility check, not a
+    cryptographic signature: GitHub repository maintainers can edit code.
+    """
+    if not isinstance(plan,dict) or plan.get("schema")!="contract_conditioned_delta_v1":
+        raise ValueError("unsupported plan")
+    expected=source_to_obligation_plans(
+        source, catalog=catalog, supported_adapters=supported_adapters,
+        budget=plan.get("attempt_budget",-1),path=plan.get("source","<source>"),
+    )
+    if plan != expected:
+        raise ValueError("contract plan changed after source/authority selection")
+
+
 def _safe_bool(value):
     return value if type(value) is bool else None
 

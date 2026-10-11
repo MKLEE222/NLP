@@ -22,7 +22,7 @@ jobs:
         include:
           - phase: upstream_bug
             repo: langchain-ai/langgraph
-            sha: b4991f1ba36a2449ab59c38ab71828ee865bff84
+            sha: b2926a0ff9589c28c7e01fe7cdbb337b86d5a4b4
           - phase: community_fix
             repo: HUAN2022A/langgraph
             sha: e0d4ecf9cd5c5bd5a731d72009936aacf8491692

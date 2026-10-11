@@ -1,0 +1,65 @@
+name: langgraph-native-duplicate-admission
+on:
+  push:
+    branches: [research/agent-failure-boundary-20261011]
+    paths:
+      - boundary_native/issue8393_langgraph_child_admission.py
+      - .github/workflows/langgraph-native-admission.yml
+  pull_request:
+    paths:
+      - boundary_native/issue8393_langgraph_child_admission.py
+      - .github/workflows/langgraph-native-admission.yml
+  workflow_dispatch:
+jobs:
+  real-langgraph-logical-child:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - phase: upstream_bug
+            repo: langchain-ai/langgraph
+            sha: b4991f1ba36a2449ab59c38ab71828ee865bff84
+          - phase: community_fix
+            repo: HUAN2022A/langgraph
+            sha: e0d4ecf9cd5c5bd5a731d72009936aacf8491692
+    env:
+      PIP_DISABLE_PIP_VERSION_CHECK: '1'
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ matrix.repo }}
+          ref: ${{ matrix.sha }}
+          path: upstream
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Pin upstream code and install public SDK
+        run: |
+          test "$(git -C upstream rev-parse HEAD)" = "${{ matrix.sha }}"
+          python -m pip install --no-cache-dir -e ./upstream/libs/langgraph
+          python -m pip freeze > native_langgraph_${{ matrix.phase }}_env.txt
+      - name: Test logical-child admission and different-ID control
+        run: |
+          mkdir -p boundary_receipts
+          timeout --signal=TERM --kill-after=10s 180s \
+            python boundary_native/issue8393_langgraph_child_admission.py \
+              --expected-phase ${{ matrix.phase }} \
+              --upstream-root upstream --source-commit ${{ matrix.sha }} \
+              --output boundary_receipts/issue8393_${{ matrix.phase }}.json
+      - name: Preserve logs and source provenance
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: langgraph-8393-${{ matrix.phase }}
+          path: |
+            boundary_receipts/
+            native_langgraph_${{ matrix.phase }}_env.txt
+          if-no-files-found: warn
+          retention-days: 14

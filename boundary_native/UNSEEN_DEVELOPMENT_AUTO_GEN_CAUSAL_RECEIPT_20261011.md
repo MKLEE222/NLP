@@ -28,7 +28,13 @@ In the ephemeral source checkout only, the lone producer's `None` stream-termina
 - The issue was already publicly reported. This is the first new development bug family added since the three original hand-read patterns, **not blind discovery**. Its source motif and adapter were coded after reading the development issue body.
 - The generator's AST call-graph overapproximates dynamic reachability; here a real native run confirmed the selected execution.
 - Official AutoGen testing utilities already support deterministic model replay. Source-guided fault generation competes with mature static flow analysis, concurrency/fault scheduling and property testing. No superiority data are available yet.
-- Unit/registry regression suite: 27 passed. The 12 precommitted confirmation cases remain untouched and must not be used to retune scanner patterns.
+- Initial unit/registry regression suite: 27 passed. After cold-start negative-control hardening, **29 passed**, including a distinct producer-vs-consumer queue mismatch and keyword-argument queue binding. Latest [native source-guided Autogen run](https://github.com/MKLEE222/NLP/actions/runs/38117010172) still detects the same actual bug. The original cross-SDK [seven-job source-guided v2 regression](https://github.com/MKLEE222/NLP/actions/runs/38117012932) also remained green. The 12 precommitted confirmation cases remain untouched and must not be used to retune scanner patterns.
 - Scientifically meaningful next steps are: dynamic source-to-adapter generalization without writing issue-specific fixtures, blind confirmed issue-level evaluation, and matched-budget differential/metamorphic/property testing baselines. Avoid asserting novelty based on one known development bug plus a test-only causal patch.
 
 Relevant files: `unseen_issue_registry_v1.json`, `source_guided_synth.py`, `execute_autogen_cancel_plan.py`, `autogen_sentinel_causal_control.py`, and the two Actions workflows.
+
+## 2026-10-11 cold-start soundness correction
+
+An early AST scanner could infer a producer/consumer relation from *unrelated* stream queues: seeing `put_nowait(None)` and `await queue.get()` somewhere in one method is not sufficient. The strengthened compiler requires an actual binding from the task's producer argument to the reader's awaited queue, including positional and keyword argument passing. On the pinned real AutoGen source it records `stream_queue -> stream`; a mismatch becomes **NO CANDIDATE**, not FAIL. This is a useful validity improvement, but not a formal interprocedural proof.
+
+Earlier intermediate GitHub Actions failures due to development-test fixture mismatch have been preserved, not counted as model failures; current 29-test and native suites pass. The causal intervention was also strengthened to refuse patching unless this exact queue binding is present.

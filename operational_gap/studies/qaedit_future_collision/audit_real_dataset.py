@@ -5,7 +5,7 @@ import hashlib
 import json
 import statistics
 from pathlib import Path
-from prepare_manifest import clean_record, load_rows, allocate
+from prepare_manifest import clean_record, load_rows, allocate, norm
 
 
 def main():
@@ -40,6 +40,36 @@ def main():
         else:
             counts["failed_current_contract"]+=1
     pools, summary=allocate(rows)
+    # Outcome prompts are allowed to be common fixed instruments, but their
+    # reuse makes event-level independence and naive row bootstrap invalid.
+    roles_by_uid = {uid: role for role, uids in pools.items() for uid in uids}
+    locality_usage = collections.Counter()
+    locality_roles = collections.defaultdict(set)
+    locality_answers = collections.defaultdict(set)
+    qa_questions = set()
+    role_sources = collections.defaultdict(collections.Counter)
+    for row in rows:
+        c = clean_record(row)
+        if c is None:
+            continue
+        role = roles_by_uid[c["uid"]]
+        role_sources[role][c["source"]] += 1
+        qa_questions.update((c["prompt_key"], c["rephrase_key"]))
+        for item in c["locality"]:
+            key = norm(item["loc"])
+            locality_usage[key] += 1
+            locality_roles[key].add(role)
+            locality_answers[key].add(norm(item["loc_ans"]))
+    locality_profile = {
+        "total_evaluation_questions": sum(locality_usage.values()),
+        "distinct_normalized_questions": len(locality_usage),
+        "questions_reused_in_multiple_rows": sum(1 for v in locality_usage.values() if v > 1),
+        "questions_shared_across_allocated_roles": sum(1 for roles in locality_roles.values() if len(roles) > 1),
+        "questions_with_conflicting_normalized_answers": sum(1 for answers in locality_answers.values() if len(answers) > 1),
+        "questions_also_used_as_primary_or_rephrase_QA": len(set(locality_usage).intersection(qa_questions)),
+        "per_role_source_counts": {role: dict(counts) for role, counts in role_sources.items()},
+        "interpretation": "Shared locality items are correlated evaluation instruments, not automatically train-test leakage."
+    }
     report={
       "data_source":"WanliYoung/Revisit-Editing-Evaluation data/QAEdit.json",
       "source_bytes":Path(args.input).stat().st_size,
@@ -53,6 +83,7 @@ def main():
       "distinct_subjects":len(subjects),
       "largest_subject_group":max(subjects.values(),default=0),
       "contract_fit":summary,
+      "locality_reuse_profile":locality_profile,
       "sample_content_in_logs":False
     }
     Path(args.report).write_text(json.dumps(report,indent=2,sort_keys=True)+"\n")

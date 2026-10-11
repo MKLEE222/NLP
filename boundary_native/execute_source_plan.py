@@ -63,6 +63,95 @@ async def _run_agents(candidate):
     }
 
 
+async def _approved_tool_case(mode, trip):
+    """Drive the two legal entrypoints with one approved local fake tool."""
+    from typing import Any
+    from agents import (
+        Agent, GuardrailFunctionOutput, ModelSettings, OutputGuardrail,
+        OutputGuardrailTripwireTriggered, RunContextWrapper, Runner, function_tool,
+    )
+    from tests.fake_model import FakeModel
+    from tests.test_responses import get_function_tool_call
+    from tests.utils.simple_session import SimpleListSession
+
+    tool_count=0
+
+    @function_tool(name_override="fixture_tool",needs_approval=True)
+    def fixture_tool(query:str)->str:
+        nonlocal tool_count
+        tool_count+=1
+        return "LOCALLY_EXECUTED"
+
+    async def guardrail(ctx:RunContextWrapper[Any],agent:Agent[Any],out:Any):
+        return GuardrailFunctionOutput(output_info=None,tripwire_triggered=trip)
+
+    session=SimpleListSession()
+    model=FakeModel()
+    model.set_next_output([get_function_tool_call(
+        "fixture_tool",'{"query":"local"}',call_id="source-plan-call")])
+    agent=Agent(name="source-generated-approval",model=model,tools=[fixture_tool],
+                model_settings=ModelSettings(tool_choice="fixture_tool"),
+                tool_use_behavior="stop_on_first_tool",
+                output_guardrails=[OutputGuardrail(guardrail_function=guardrail)])
+
+    async def execute(inp):
+        if mode=="run":
+            return await Runner.run(agent,inp,session=session)
+        s=Runner.run_streamed(agent,inp,session=session)
+        async for _ in s.stream_events():
+            pass
+        return s
+
+    first=await execute("Local approval fixture")
+    if not first.interruptions:
+        raise RuntimeError("missing documented approval interruption")
+    state=first.to_state()
+    state.approve(first.interruptions[0])
+    status="ok"
+    try:
+        await execute(state)
+    except OutputGuardrailTripwireTriggered:
+        status="blocked"
+    items=await session.get_items()
+    calls=[x for x in items if isinstance(x,dict) and x.get("type")=="function_call"]
+    outputs=[x for x in items if isinstance(x,dict)
+             and x.get("type")=="function_call_output"]
+    return {
+        "variant":mode+("_trip" if trip else "_pass"),
+        "mode":mode,"tripwire":trip,"status":status,"tool_executions":tool_count,
+        "session_call_count":len(calls),"session_output_count":len(outputs),
+        "call_ids":[x.get("call_id") for x in calls],
+        "output_ids":[x.get("call_id") for x in outputs],
+    }
+
+
+async def _run_approved(candidate):
+    cases={}
+    for trip in (False,True):
+        for mode in ("run","streamed"):
+            x=await _approved_tool_case(mode,trip)
+            cases[(mode,trip)]=x
+    controls=[cases[(mode,False)]["status"]=="ok" for mode in ("run","streamed")]
+    controls.extend(cases[(mode,False)]["session_output_count"]==1
+                    for mode in ("run","streamed"))
+    controls.extend(x["tool_executions"]==1 and x["session_call_count"]==1
+                    for x in cases.values())
+    if not all(controls):
+        return {"status":"UNKNOWN","reason":"invalid_mode_or_tool_control",
+                "cases":list(cases.values())}
+    problems=[]
+    for (mode,trip),x in cases.items():
+        if x["status"]!=("blocked" if trip else "ok"):
+            problems.append(mode+":"+str(trip)+":wrong_guardrail_status")
+        if x["output_ids"]!=x["call_ids"]:
+            problems.append(mode+":"+str(trip)+":persisted_call_result_mismatch")
+    return {
+        "status":"FAIL" if problems else "PASS",
+        "reason":",".join(problems) if problems else "approved_effect_persisted",
+        "cases":list(cases.values()),
+    }
+
+
 def _langgraph_case(same):
     from langgraph._internal._constants import CONF, CONFIG_KEY_SCRATCHPAD
     from langgraph.pregel._runner import _call
@@ -141,6 +230,9 @@ def run(root:Path,plan:dict):
     if plan["profile"]=="agents-guardrail":
         sys.path.insert(0,str(root.resolve()))
         outcome=asyncio.run(_run_agents(case))
+    elif plan["profile"]=="agents-approved-persistence":
+        sys.path.insert(0,str(root.resolve()))
+        outcome=asyncio.run(_run_approved(case))
     else:
         sys.path.insert(0,str(root.resolve()/"libs"/"langgraph"))
         outcome=_run_langgraph(case)

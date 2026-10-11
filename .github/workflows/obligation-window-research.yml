@@ -1,0 +1,170 @@
+name: source-obligation-window-research
+on:
+  push:
+    branches: [research/obligation-window-kernel-20261011]
+    paths:
+      - 'boundary_native/obligation_window_kernel.py'
+      - 'boundary_native/test_obligation_window_kernel.py'
+      - 'boundary_native/native_window_executor.py'
+      - '.github/workflows/obligation-window-research.yml'
+  pull_request:
+    paths:
+      - 'boundary_native/obligation_window_kernel.py'
+      - 'boundary_native/test_obligation_window_kernel.py'
+      - 'boundary_native/native_window_executor.py'
+      - '.github/workflows/obligation-window-research.yml'
+  workflow_dispatch:
+jobs:
+  generic-algorithm-and-adversarial-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Existing holdout guards plus adversarial AST tests
+        run: |
+          python -m compileall -q boundary_native
+          python -m unittest discover -s boundary_native -p 'test_*.py' -v
+  source-to-native-development:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      OPENAI_AGENTS_DISABLE_TRACING: '1'
+      PIP_DISABLE_PIP_VERSION_CHECK: '1'
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: microsoft/autogen
+          ref: 027ecf0a379bcc1d09956d46d12d44a3ad9cee14
+          path: upstream
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Audit source and install no-network-local-mocking dependencies
+        run: |
+          test "$(git -C upstream rev-parse HEAD)" = '027ecf0a379bcc1d09956d46d12d44a3ad9cee14'
+          python -m pip install --no-cache-dir -e ./upstream/python/packages/autogen-core
+          python -m pip install --no-cache-dir --no-deps -e ./upstream/python/packages/autogen-agentchat
+          python -m pip install --no-cache-dir --no-deps -e ./upstream/python/packages/autogen-ext
+          python -m pip freeze > window_native_environment.txt
+      - name: Generate obligation window from arbitrary pinned Python source
+        run: |
+          mkdir -p window_receipts
+          python boundary_native/obligation_window_kernel.py \
+            --source upstream/python/packages/autogen-agentchat/src/autogen_agentchat/agents/_assistant_agent.py \
+            --budget 1 --output window_receipts/window_plan.json
+      - name: Execute independently checked generated window on native AutoGen
+        run: |
+          timeout --signal=TERM --kill-after=8s 75s \
+            python boundary_native/native_window_executor.py \
+              --root upstream --plan window_receipts/window_plan.json \
+              --timeout 1.5 --output window_receipts/window_native.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('window_receipts/window_native.json').read_text())
+          assert r['observation']['status']=='FAIL'
+          assert r['observation']['control']['terminal']=='returned'
+          assert r['observation']['fault']['terminal']=='timeout'
+          print('SOURCE_WINDOW_NATIVE_DEV',r['obligation'],r['observation']['status'])
+          PY
+      - name: Check causal modified source closes the reported static window
+        run: |
+          python boundary_native/autogen_sentinel_causal_control.py \
+            --upstream-root upstream \
+            --output window_receipts/causal_patch.json
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0,'boundary_native')
+          from obligation_window_kernel import compile_source
+          f=Path('upstream/python/packages/autogen-agentchat/src/autogen_agentchat/agents/_assistant_agent.py')
+          got=compile_source(f.read_text(),path=str(f))
+          print('CAUSAL_WINDOW_CONTRAST',got['candidate_count'])
+          assert got['candidate_count']==0
+          Path('window_receipts/causal_window.json').write_text(__import__('json').dumps(got,indent=2)+'\n')
+          PY
+      - name: Archive native proof, source facts, environment and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: generic-source-obligation-window-dev
+          path: |
+            window_receipts/
+            window_native_environment.txt
+          if-no-files-found: warn
+          retention-days: 14
+
+  native-logical-task-identity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - phase: upstream_bug
+            repo: langchain-ai/langgraph
+            sha: b2926a0ff9589c28c7e01fe7cdbb337b86d5a4b4
+            identity_projection: object
+          - phase: community_fix
+            repo: HUAN2022A/langgraph
+            sha: e0d4ecf9cd5c5bd5a731d72009936aacf8491692
+            identity_projection: id
+    env:
+      PIP_DISABLE_PIP_VERSION_CHECK: '1'
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ matrix.repo }}
+          ref: ${{ matrix.sha }}
+          path: upstream
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install immutable original or unmerged community revision
+        run: |
+          test "$(git -C upstream rev-parse HEAD)" = "${{ matrix.sha }}"
+          python -m pip install --no-cache-dir -e ./upstream/libs/langgraph
+          python -m pip freeze > native_langgraph_${{ matrix.phase }}_environment.txt
+      - name: Compile both sync and async task identity obligations
+        run: |
+          mkdir -p window_receipts
+          python boundary_native/obligation_window_kernel.py --source upstream/libs/langgraph/langgraph/pregel/_runner.py --budget 2 --output window_receipts/task_identity_source.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data=json.loads(Path('window_receipts/task_identity_source.json').read_text())
+          got=data['selected']
+          assert len(got)==2, (len(got),data['candidate_count'])
+          assert {x['source_obligation'] for x in got}=={'inflight_logical_task_not_reissued'}
+          assert {x['existing_projection'] for x in got}=={"${{ matrix.identity_projection }}"}
+          assert {x['caller'] for x in got}=={'_call','_acall_impl'}
+          print('LOGICAL_ID_WINDOWS',len(got),[x['guard_at_line'] for x in got])
+          PY
+      - name: Native real task-admission witness and identity control
+        run: |
+          timeout --signal=TERM --kill-after=8s 85s python boundary_native/issue8393_langgraph_child_admission.py --upstream-root upstream --source-commit ${{ matrix.sha }} --expected-phase ${{ matrix.phase }} --output window_receipts/task_identity_native.json
+      - name: Preserve both source and runtime records
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: obligation-window-langgraph-${{ matrix.phase }}
+          path: |
+            window_receipts/
+            native_langgraph_${{ matrix.phase }}_environment.txt
+          if-no-files-found: warn
+          retention-days: 14

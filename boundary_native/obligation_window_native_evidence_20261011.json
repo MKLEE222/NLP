@@ -1,0 +1,190 @@
+{
+  "description": "Self-generated two-type obligation-window compiler on real source and native developer controls; original previously reported bugs only",
+  "date": "2026-10-11",
+  "workflow_run": 38117897011,
+  "workflow_url": "https://github.com/MKLEE222/NLP/actions/runs/38117897011",
+  "source_frameworks": 2,
+  "distinct_upstream_issue_units": 2,
+  "source_versions": 3,
+  "source_candidates": 5,
+  "unseen_confirmation_opened": false,
+  "records": [
+    {
+      "job_id": 114406406477,
+      "job_name": "native-logical-task-identity (upstream_bug, langchain-ai/langgraph, b2926a0ff9589c28c7e01fe7cdbb3...",
+      "conclusion": "success",
+      "source_compiler": {
+        "candidate_count": 2,
+        "selected": 2,
+        "source_sha256": "316cf133c724163a18ef279322615588b3fa8b96e359289a7cadea90f0df7622",
+        "status": "SOURCE_TEST_PLAN_NOT_EXECUTED",
+        "window_sources": [
+          [
+            "_acall_impl",
+            "inflight_logical_task_not_reissued",
+            "t",
+            885,
+            null
+          ],
+          [
+            "_call",
+            "inflight_logical_task_not_reissued",
+            "t",
+            738,
+            null
+          ]
+        ]
+      },
+      "native_stream": null,
+      "native_task": {
+        "different_id_negative_control": {
+          "candidate_child_id": "child-B",
+          "logical_id_same": false,
+          "new_child_admissions": 1,
+          "original_child_id": "child-A",
+          "original_pending_future": true,
+          "returned_future_done": false
+        },
+        "issue": "https://github.com/langchain-ai/langgraph/issues/8393",
+        "patch_pr": "https://github.com/langchain-ai/langgraph/pull/8485",
+        "patch_status": "closed_unmerged_community_code",
+        "same_id": {
+          "candidate_child_id": "child-A",
+          "logical_id_same": true,
+          "new_child_admissions": 1,
+          "original_child_id": "child-A",
+          "original_pending_future": true,
+          "returned_future_done": false
+        },
+        "scope": "duplicate child scheduling admission only; no external effect executed",
+        "source": "langchain-ai/langgraph",
+        "source_sha": "b2926a0ff9589c28c7e01fe7cdbb337b86d5a4b4",
+        "verdict": "EXPECTED_DUPLICATE_ADMISSION"
+      },
+      "causal_zero": false,
+      "unit_test_receipt": null
+    },
+    {
+      "job_id": 114406406604,
+      "job_name": "generic-algorithm-and-adversarial-tests",
+      "conclusion": "success",
+      "source_compiler": null,
+      "native_stream": null,
+      "native_task": null,
+      "causal_zero": false,
+      "unit_test_receipt": "Ran 41 tests in 0.063s"
+    },
+    {
+      "job_id": 114406406613,
+      "job_name": "native-logical-task-identity (community_fix, HUAN2022A/langgraph, e0d4ecf9cd5c5bd5a731d72009936aa...",
+      "conclusion": "success",
+      "source_compiler": {
+        "candidate_count": 2,
+        "selected": 2,
+        "source_sha256": "86d57dd543635c9b91e212f8eeb5b74571e2f1828a64f3d2d47b31f54c651f64",
+        "status": "SOURCE_TEST_PLAN_NOT_EXECUTED",
+        "window_sources": [
+          [
+            "_acall_impl",
+            "inflight_logical_task_not_reissued",
+            "t",
+            885,
+            null
+          ],
+          [
+            "_call",
+            "inflight_logical_task_not_reissued",
+            "t",
+            738,
+            null
+          ]
+        ]
+      },
+      "native_stream": null,
+      "native_task": {
+        "different_id_negative_control": {
+          "candidate_child_id": "child-B",
+          "logical_id_same": false,
+          "new_child_admissions": 1,
+          "original_child_id": "child-A",
+          "original_pending_future": true,
+          "returned_future_done": false
+        },
+        "issue": "https://github.com/langchain-ai/langgraph/issues/8393",
+        "patch_pr": "https://github.com/langchain-ai/langgraph/pull/8485",
+        "patch_status": "closed_unmerged_community_code",
+        "same_id": {
+          "candidate_child_id": "child-A",
+          "logical_id_same": true,
+          "new_child_admissions": 0,
+          "original_child_id": "child-A",
+          "original_pending_future": true,
+          "returned_future_done": false
+        },
+        "scope": "duplicate child scheduling admission only; no external effect executed",
+        "source": "langchain-ai/langgraph",
+        "source_sha": "e0d4ecf9cd5c5bd5a731d72009936aacf8491692",
+        "verdict": "EXPECTED_DEDUP_ADMISSION"
+      },
+      "causal_zero": false,
+      "unit_test_receipt": null
+    },
+    {
+      "job_id": 114406406617,
+      "job_name": "source-to-native-development",
+      "conclusion": "success",
+      "source_compiler": {
+        "candidate_count": 1,
+        "selected": 1,
+        "source_sha256": "c0e578fc34be40f46f8e36a91b53fb27cf5ff454f4efb3f4ea5dc1e32d0048c1",
+        "status": "SOURCE_TEST_PLAN_NOT_EXECUTED",
+        "window_sources": [
+          [
+            "_process_model_result",
+            "stream_terminal_delivery",
+            "_execute_tool_calls",
+            1200,
+            1214
+          ]
+        ]
+      },
+      "native_stream": {
+        "activation_line": 1217,
+        "discharge_line": 1214,
+        "disclaimer": "known public AutoGen development bug; manually trusted native SDK adapter",
+        "fault_cut_line": 1200,
+        "obligation": "stream_terminal_delivery",
+        "observation": {
+          "control": {
+            "events": [
+              "ToolCallRequestEvent",
+              "ToolCallExecutionEvent",
+              "Response"
+            ],
+            "exception_type": null,
+            "terminal": "returned",
+            "tool_started": true,
+            "variant": "normal_complete"
+          },
+          "fault": {
+            "events": [
+              "ToolCallRequestEvent"
+            ],
+            "exception_type": null,
+            "terminal": "timeout",
+            "tool_started": true,
+            "variant": "cancel_inflight"
+          },
+          "reason": "cancellation_blocks_stream_until_timeout",
+          "status": "FAIL",
+          "timeout_seconds_per_phase": 1.5
+        },
+        "source_digest": "c0e578fc34be40f46f8e36a91b53fb27cf5ff454f4efb3f4ea5dc1e32d0048c1",
+        "status": "SOURCE_TO_NATIVE_EXECUTED"
+      },
+      "native_task": null,
+      "causal_zero": true,
+      "unit_test_receipt": null
+    }
+  ]
+}

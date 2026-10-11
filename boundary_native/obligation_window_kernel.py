@@ -100,6 +100,38 @@ def _is_none_sentinel(stmt: ast.AST):
     return call.func.value.id
 
 
+def _consumer_reads_after_spawn_without_rebinding(outer, excluded_nodes, queue, spawn_line):
+    """Syntactic single-binding certificate, fail closed on rebinding.
+
+    Source-level names are not full alias identities. A queue variable
+    rewritten after the task has been spawned might identify a *different*
+    queue at the awaited read. Reject this candidate even if names coincide.
+    """
+    reads=[]
+    assignments=[]
+    for part in ast.walk(outer):
+        if id(part) in excluded_nodes:
+            continue
+        if isinstance(part,ast.Await):
+            getter=part.value
+            if (isinstance(getter,ast.Call)
+                and isinstance(getter.func,ast.Attribute)
+                and getter.func.attr=="get"
+                and isinstance(getter.func.value,ast.Name)
+                and getter.func.value.id==queue):
+                reads.append(part.lineno)
+        if isinstance(part,(ast.Assign,ast.AnnAssign,ast.AugAssign)):
+            targets=(part.targets if isinstance(part,ast.Assign) else [part.target])
+            if any(isinstance(target,ast.Name) and target.id==queue
+                   for target in targets):
+                assignments.append(part.lineno)
+    return any(
+        reader>spawn_line and
+        not any(spawn_line<write<reader for write in assignments)
+        for reader in reads
+    )
+
+
 def _awaits_of_statement(node: ast.AST):
     # Restrict to the *current block* and exclude local nested defs to avoid
     # assigning future checkpoints to the wrong producer.
@@ -118,6 +150,10 @@ def _unsafe_await_to_discharges(producer: ast.AsyncFunctionDef):
     windows=[]
     def walk_block(stmts, guarded: set[str]):
         for i,stmt in enumerate(stmts):
+            # A direct terminal transfer stops normal sequential execution.
+            # Other higher-order control flow is intentionally not assumed.
+            if isinstance(stmt,(ast.Return,ast.Raise,ast.Break,ast.Continue)):
+                break
             if isinstance(stmt,ast.Try):
                 protected=set(guarded)
                 for fin in stmt.finalbody:
@@ -138,6 +174,8 @@ def _unsafe_await_to_discharges(producer: ast.AsyncFunctionDef):
                 continue
             # Resolve an after-await direct statement (not a may-run branch).
             for later in stmts[i+1:]:
+                if isinstance(later,(ast.Return,ast.Raise,ast.Break,ast.Continue)):
+                    break
                 formal=_is_none_sentinel(later)
                 if formal is not None and formal not in guarded:
                     for await_site in awaits:
@@ -166,6 +204,9 @@ def compile_source(source: str, *, path: str="<source>") -> dict:
                     considered+=1
                     for actual,spawn_line in _match_spawn_alias(f,producer,formal):
                         if actual not in reads:
+                            continue
+                        if not _consumer_reads_after_spawn_without_rebinding(
+                            f,exclusions,actual,spawn_line):
                             continue
                         findings.append(Window(
                             source_sha256=digest,

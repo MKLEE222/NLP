@@ -1,0 +1,42 @@
+name: native-boundary-obligation-replay
+on:
+  push:
+    branches: [research/agent-failure-boundary-20261011]
+    paths:
+      - 'boundary_native/obligation_core.py'
+      - 'boundary_native/test_obligation_core.py'
+      - 'boundary_native/native_evidence_20261011.json'
+      - '.github/workflows/native-obligation-replay.yml'
+  pull_request:
+    paths:
+      - 'boundary_native/obligation_core.py'
+      - 'boundary_native/test_obligation_core.py'
+      - 'boundary_native/native_evidence_20261011.json'
+      - '.github/workflows/native-obligation-replay.yml'
+  workflow_dispatch:
+jobs:
+  typed-native-event-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Unit validation and integrity checks
+        run: |
+          python -m compileall -q boundary_native
+          python -m unittest discover -s boundary_native -p 'test_*.py' -v
+      - name: Replay source-native evidence against independent obligations
+        run: |
+          python boundary_native/obligation_core.py \
+            --input boundary_native/native_evidence_20261011.json \
+            --output /tmp/native_obligation_receipt.json
+      - name: Archive derived mechanical verdicts
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-obligation-prototype
+          path: /tmp/native_obligation_receipt.json
+          retention-days: 14

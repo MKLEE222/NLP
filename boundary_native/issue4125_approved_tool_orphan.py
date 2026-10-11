@@ -73,9 +73,18 @@ async def run_case(mode: str, trip: bool):
         else type(item).__name__
         for item in items
     ]
+    call_ids = [
+        item.get("call_id") for item in items
+        if isinstance(item,dict) and item.get("type")=="function_call"
+    ]
+    output_ids = [
+        item.get("call_id") for item in items
+        if isinstance(item,dict) and item.get("type")=="function_call_output"
+    ]
     return {
         "mode": mode, "tripwire": trip, "status": result_status,
         "session_types": types, "tool_executions": effect_count,
+        "session_call_ids": call_ids, "session_output_ids": output_ids,
         "orphaned": ("function_call" in types and
                      types.count("function_call_output") < types.count("function_call")),
         "paired": ("function_call" in types and

@@ -118,12 +118,14 @@ def identity_certificate(window: dict) -> dict:
 
 
 def source_to_obligation_plans(
-    source: str, *, catalog: dict, supported_adapters: dict[str, bool],
+    source: str, *, catalog: dict, supported_adapters: dict[str, dict],
     budget: int=2, path: str="<source>"
 ) -> dict:
     if budget < 0:
         raise ValueError("execution budget must be nonnegative")
     validate_catalog(catalog)
+    if supported_adapters.get("schema")!="trusted_local_adapters_v1":
+        raise ValueError("unsupported native adapter registry")
     native_source=compile_source(source,path=path)
     verify_source_plan(source,native_source)
     entries=catalog["obligations"]
@@ -140,8 +142,12 @@ def source_to_obligation_plans(
             static_status,reason="UNKNOWN","external_contract_not_registered"
         elif cert["status"]!="PROVED_STRUCTURAL":
             static_status,reason="UNKNOWN",cert["reason"]
-        elif supported_adapters.get(kind) is not True:
+        elif not isinstance(supported_adapters.get("adapters",{}).get(kind),dict):
             static_status,reason="UNKNOWN","trusted_native_adapter_unavailable"
+        elif not (supported_adapters["adapters"][kind].get("local_only") is True
+                  and hashlib.sha256(source.encode("utf-8")).hexdigest()
+                  in supported_adapters["adapters"][kind].get("source_sha256", [])):
+            static_status,reason="UNKNOWN","adapter_not_authorized_for_exact_source"
         elif cut["fault"] not in norm["legal_fault_variants"]:
             static_status,reason="UNKNOWN","fault_not_licensed_by_normative_contract"
         # The higher-order adapter MUST still check actual admission/rights.
@@ -190,6 +196,8 @@ def source_to_obligation_plans(
         "source_sha256":hashlib.sha256(source.encode("utf-8")).hexdigest(),
         "catalog_sha256":hashlib.sha256(
             json.dumps(catalog,sort_keys=True).encode("utf-8")).hexdigest(),
+        "adapter_registry_sha256":hashlib.sha256(
+            json.dumps(supported_adapters,sort_keys=True).encode("utf-8")).hexdigest(),
         "source_candidate_count":len(examined),
         "source_supported_count":sum(x["planning_status"]=="READY" for x in examined),
         "source_unknown_count":sum(x["planning_status"]=="UNKNOWN" for x in examined),

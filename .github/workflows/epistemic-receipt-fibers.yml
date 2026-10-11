@@ -1,0 +1,50 @@
+name: parallel-C-epistemic-agent-receipts
+on:
+  push:
+    branches: [research/epistemic-receipt-fibers-20261011]
+    paths:
+      - 'boundary_native/epistemic_receipt_fibers.py'
+      - 'boundary_native/test_epistemic_receipt_fibers.py'
+      - 'boundary_native/run_epistemic_native_dev.py'
+      - 'boundary_native/epistemic_native_development_inputs_20261011.json'
+      - '.github/workflows/epistemic-receipt-fibers.yml'
+  workflow_dispatch:
+jobs:
+  receipt-source-and-observation-rights:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Counterexample invariants, source rights, no implicit retries
+        run: |
+          python -m compileall -q boundary_native/epistemic_receipt_fibers.py boundary_native/run_epistemic_native_dev.py
+          python -m unittest discover -s boundary_native -p 'test_epistemic_receipt_fibers.py' -v
+      - name: Compare same historical native SDK issue before and after fix
+        run: |
+          mkdir -p epistemic_receipts
+          python boundary_native/run_epistemic_native_dev.py \
+            --input boundary_native/epistemic_native_development_inputs_20261011.json \
+            --output epistemic_receipts/actual_native_case.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('epistemic_receipts/actual_native_case.json').read_text())
+          assert x['issue_units']==1
+          assert not x['real_remote_commit_known']
+          assert x['known_historical_issue']
+          assert all(v['possible_worlds']['can_replay_without_external_duplication']==
+                     'UNSAFE_OR_UNAUTHORIZED' for v in x['results'])
+          PY
+      - name: Preserve negative results/actual source of observation
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: parallel-C-agent-receipt-fiber
+          path: epistemic_receipts/
+          if-no-files-found: warn
+          retention-days: 14

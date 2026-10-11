@@ -1,0 +1,131 @@
+name: source-guided-native-failure-plans
+on:
+  push:
+    branches: [research/source-guided-failure-synthesis-20261011]
+    paths:
+      - 'boundary_native/source_guided_synth.py'
+      - 'boundary_native/execute_source_plan.py'
+      - 'boundary_native/test_source_guided_synth.py'
+      - '.github/workflows/source-guided-boundaries.yml'
+  pull_request:
+    paths:
+      - 'boundary_native/source_guided_synth.py'
+      - 'boundary_native/execute_source_plan.py'
+      - 'boundary_native/test_source_guided_synth.py'
+      - '.github/workflows/source-guided-boundaries.yml'
+  workflow_dispatch:
+jobs:
+  source-compiler-controls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Recheck old oracle plus fresh source-synthesis tests
+        run: |
+          python -m compileall -q boundary_native
+          python -m unittest discover -s boundary_native -p 'test_*.py' -v
+  genuine-upstream-boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: agents-old
+            repo: openai/openai-agents-python
+            sha: 683b6e79e5b4a2e3fc3cac80b556101ce778beae
+            profile: agents-guardrail
+            expected: FAIL
+          - label: agents-fixed
+            repo: openai/openai-agents-python
+            sha: 4a3d33e44fcd5051ff1b08f136ca61aef7824e63
+            profile: agents-guardrail
+            expected: PASS
+          - label: langgraph-upstream
+            repo: langchain-ai/langgraph
+            sha: b2926a0ff9589c28c7e01fe7cdbb337b86d5a4b4
+            profile: langgraph-admission
+            expected: FAIL
+          - label: langgraph-community-patch
+            repo: HUAN2022A/langgraph
+            sha: e0d4ecf9cd5c5bd5a731d72009936aacf8491692
+            profile: langgraph-admission
+            expected: PASS
+    env:
+      OPENAI_AGENTS_DISABLE_TRACING: '1'
+      PIP_DISABLE_PIP_VERSION_CHECK: '1'
+      PYTHONUNBUFFERED: '1'
+      TOKENIZERS_PARALLELISM: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ matrix.repo }}
+          ref: ${{ matrix.sha }}
+          path: upstream
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Audit exact upstream and install native SDK
+        run: |
+          test "$(git -C upstream rev-parse HEAD)" = "${{ matrix.sha }}"
+          if [ "${{ matrix.profile }}" = "agents-guardrail" ]; then
+            python -m pip install --no-cache-dir -e upstream
+            python -m pip install --no-cache-dir 'openai==2.26.0'
+          else
+            python -m pip install --no-cache-dir -e upstream/libs/langgraph
+          fi
+          python -m pip freeze > source_guided_${{ matrix.label }}_env.txt
+      - name: Compile source-linked plans (no issue labels provided)
+        run: |
+          mkdir -p source_guided_receipts
+          python boundary_native/source_guided_synth.py \
+            --upstream-root upstream --profile ${{ matrix.profile }} \
+            --budget 1 \
+            --output source_guided_receipts/plan_${{ matrix.label }}.json
+      - name: Execute selected candidate on original SDK source
+        run: |
+          timeout --signal=TERM --kill-after=10s 300s \
+            python boundary_native/execute_source_plan.py \
+            --upstream-root upstream \
+            --plan source_guided_receipts/plan_${{ matrix.label }}.json \
+            --output source_guided_receipts/native_${{ matrix.label }}.json
+      - name: External before/fix evaluation and denominator
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          label="${{ matrix.label }}"
+          expected="${{ matrix.expected }}"
+          plan=json.loads(Path("source_guided_receipts/plan_"+label+".json").read_text())
+          native=json.loads(Path("source_guided_receipts/native_"+label+".json").read_text())
+          got=native["runtime_result"]["status"]
+          print("PROTOCOL_RECAP",{
+            "label":label,"upstream_repo":"${{ matrix.repo }}",
+            "sha":"${{ matrix.sha }}","profile":plan["profile"],
+            "source_candidates":plan["candidate_count"],
+            "runnable":plan["runnable_count"],
+            "selected":len(plan["selected"]),
+            "native_contract":got,
+            "externally_registered_before_fix_expected":expected,
+            "search_space":plan["search_space"],
+          })
+          if got!=expected or len(plan["selected"])!=1:
+            raise SystemExit("unexpected native failure-boundary evaluation")
+          PY
+      - name: Preserve raw source plan, runtime observation and environment
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-guided-${{ matrix.label }}
+          path: |
+            source_guided_receipts/
+            source_guided_${{ matrix.label }}_env.txt
+          if-no-files-found: warn
+          retention-days: 14

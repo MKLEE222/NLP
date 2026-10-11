@@ -1,0 +1,88 @@
+name: obligation-delta-vs-classical-source-policies
+on:
+  push:
+    branches: [research/obligation-delta-baselines-20261011]
+    paths:
+      - 'boundary_native/contract_delta.py'
+      - 'boundary_native/classical_cut_baselines.py'
+      - 'boundary_native/run_source_baseline_matrix.py'
+      - 'boundary_native/test_contract_delta.py'
+      - 'boundary_native/normative_contracts_development_v1.json'
+      - 'boundary_native/trusted_native_adapters_development_v1.json'
+      - '.github/workflows/obligation-delta-comparison.yml'
+  pull_request:
+    paths:
+      - 'boundary_native/contract_delta.py'
+      - 'boundary_native/classical_cut_baselines.py'
+      - 'boundary_native/run_source_baseline_matrix.py'
+      - 'boundary_native/test_contract_delta.py'
+      - 'boundary_native/normative_contracts_development_v1.json'
+      - 'boundary_native/trusted_native_adapters_development_v1.json'
+      - '.github/workflows/obligation-delta-comparison.yml'
+  workflow_dispatch:
+jobs:
+  unit-contract-delta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Complete inherited + new program-analysis/contract tests
+        run: |
+          python -m compileall -q boundary_native
+          python -m unittest discover -s boundary_native -p 'test_*.py' -v
+  pinned-development-source-comparison:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: autogen_dev_7956
+            repo: microsoft/autogen
+            sha: 027ecf0a379bcc1d09956d46d12d44a3ad9cee14
+            source: python/packages/autogen-agentchat/src/autogen_agentchat/agents/_assistant_agent.py
+          - label: langgraph_dev_8393_orig
+            repo: langchain-ai/langgraph
+            sha: b2926a0ff9589c28c7e01fe7cdbb337b86d5a4b4
+            source: libs/langgraph/langgraph/pregel/_runner.py
+          - label: langgraph_dev_8393_patch
+            repo: HUAN2022A/langgraph
+            sha: e0d4ecf9cd5c5bd5a731d72009936aacf8491692
+            source: libs/langgraph/langgraph/pregel/_runner.py
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ matrix.repo }}
+          ref: ${{ matrix.sha }}
+          path: upstream
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Assert identical pinned full source for all classic/adapted/new methods
+        run: |
+          test "$(git -C upstream rev-parse HEAD)" = "${{ matrix.sha }}"
+          mkdir -p delta_comparison
+      - name: Fixed budget two, same source text, honest unavailable dynamic trace
+        run: |
+          python boundary_native/run_source_baseline_matrix.py \
+            --source upstream/${{ matrix.source }} \
+            --catalog boundary_native/normative_contracts_development_v1.json \
+            --adapters boundary_native/trusted_native_adapters_development_v1.json \
+            --budget 2 --output delta_comparison/${{ matrix.label }}.json
+      - name: Preserve actual candidate denominators and timings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: delta-source-${{ matrix.label }}
+          path: delta_comparison/
+          if-no-files-found: warn
+          retention-days: 14

@@ -30,7 +30,9 @@ def registry_for(source:str,kind="stream_terminal_delivery"):
     digest=hashlib.sha256(source.encode("utf-8")).hexdigest()
     return {
         "schema":"trusted_local_adapters_v1",
-        "adapters":{kind:{"local_only":True,"source_sha256":[digest]}},
+        "adapters":{kind:{"local_only":True,"source_sha256":[digest],
+                          "supported_callers":(["_call","_acall_impl"] if kind==
+                            "inflight_logical_task_not_reissued" else ["client"])}},
     }
 
 
@@ -135,6 +137,19 @@ class SourcePlanTests(unittest.TestCase):
                             =="inflight_logical_task_id"
                             for item in m["examined"]))
 
+    def test_realistic_adapter_scope_marks_async_source_site_unknown(self):
+        adapters=registry_for(LOGICAL_TASK,"inflight_logical_task_not_reissued")
+        adapters["adapters"]["inflight_logical_task_not_reissued"]["supported_callers"]=["_call"]
+        p=source_to_obligation_plans(
+            LOGICAL_TASK,catalog=CATALOG,supported_adapters=adapters,budget=2)
+        self.assertEqual(p["source_candidate_count"],2)
+        self.assertEqual(p["source_supported_count"],1)
+        self.assertEqual(p["source_unknown_count"],1)
+        self.assertEqual(len(p["selected"]),1)
+        self.assertEqual(p["examined"][0]["planning_status"],"UNKNOWN")
+        self.assertEqual(p["examined"][0]["reason"],
+                         "source_callable_not_executable_by_native_adapter")
+
     def test_no_external_rights_promoted_by_source_only(self):
         m=source_to_obligation_plans(
             BASE,catalog=CATALOG,supported_adapters={
@@ -142,6 +157,7 @@ class SourcePlanTests(unittest.TestCase):
                 "adapters":{"stream_terminal_delivery":{
                     "local_only":False,
                     "source_sha256":[hashlib.sha256(BASE.encode()).hexdigest()],
+                    "supported_callers":["client"],
                 }},
             },
         )

@@ -32,6 +32,14 @@ Source reports are leads unless independently reproduced on pinned native SDK co
 
 The source-author-created issue labels and closure states do not themselves prove bugs remain on latest main.
 
+## Direct engineering near neighbor uncovered during native bug triage
+
+**AgentCI** (https://github.com/jinngimk-lang/agentci), an open public project, already provides provider-neutral upstream-failure fixture intake, structured provenance/case/trajectory evidence, fail-closed UNVERIFIED states and route-binding eligibility checks. Its README specifically invites real agent runtime issue fixtures; its upstream intake defines a four-file bug artifact plus test. It is NOT an accepted top-conference proof of any method claim, and its own documentation explicitly denies production certification. But it is a **direct engineering neighbor** to our proposed generic effect-trace/evidence packaging.
+
+Read https://github.com/jinngimk-lang/agentci/blob/main/docs/contributing/upstream-fixture-intake.md and https://github.com/jinngimk-lang/agentci/blob/main/docs/architecture/s1-execution-route-binding.md before claiming independent novelty. A simple "provider-neutral failure fixture validator" would duplicate existing public engineering capabilities. Our stronger potentially differentiating route is **automatic source-constrained failure-boundary scenario generation and semantic fault scheduling**, followed by independently checked effect obligations, with a measured gain over *existing* fixture validators, general schedulers and manual original bug tests.
+
+We must not confuse an open-source comparator with a published peer-reviewed research result, or erase new research opportunities merely because its README describes a similar domain.
+
 ## C. Candidate technical mechanisms to investigate, not claim yet
 
 ### Candidate A — Boundary-aware schedule/test synthesizer

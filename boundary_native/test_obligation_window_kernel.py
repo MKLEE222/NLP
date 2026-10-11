@@ -63,11 +63,16 @@ VARIANTS=[
         "output_queue.put_nowait(None)",
         "output_queue.put_nowait('payload')\n        output_queue.put_nowait(None)"),True),
     ("no_sentinel",BASE.replace("output_queue.put_nowait(None)","return None"),False),
+    ("queue_rebound_between_spawn_and_read",
+     BASE.replace("    while True:", "    queue=asyncio.Queue()\n    while True:"),False),
+    ("exit_before_discharge",
+     BASE.replace("        output_queue.put_nowait(None)",
+                  "        return x\n        output_queue.put_nowait(None)"),False),
     ("sentinel_other_queue",BASE.replace("output_queue.put_nowait(None)",
                                          "second_queue.put_nowait(None)"),False),
     ("immediate_return_before_await",BASE.replace(
         "x = await asyncio.gather(slow_tool())",
-        "return 2\n        x = await asyncio.gather(slow_tool())"),True), # risk-only; unreachable not excluded by AST
+        "return 2\n        x = await asyncio.gather(slow_tool())"),False), # unreachable sequential path is now correctly pruned
 ]
 
 
@@ -82,7 +87,7 @@ class GenericWindowMethod(unittest.TestCase):
                 self.assertEqual(plan["status"],"SOURCE_TEST_PLAN_NOT_EXECUTED")
                 verify_source_plan(src,plan)
                 outputs.append((name,got,naive_token_baseline(src)))
-        self.assertEqual(sum(x[1] for x in outputs),6)
+        self.assertEqual(sum(x[1] for x in outputs),5)
         # The comparator is intentionally weak and includes wrong-queue cases.
         self.assertGreater(sum(x[2] for x in outputs),sum(x[1] for x in outputs))
 

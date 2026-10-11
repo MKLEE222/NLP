@@ -129,5 +129,136 @@
         "timeout_seconds_per_phase": 1.5
       }
     }
+  ],
+  "latest_queue_bound_revalidation": [
+    {
+      "run_id": 38117010172,
+      "job_id": 114403786997,
+      "run_url": "https://github.com/MKLEE222/NLP/actions/runs/38117010172",
+      "job_conclusion": "success",
+      "SOURCE_SCENARIOS": {
+        "adapter": "autogen-cancellation-stream",
+        "candidate_count": 1,
+        "profile": "autogen-tool-cancellation",
+        "rights_limit": "Supported adapter and normative contract supplied externally",
+        "runnable_count": 1,
+        "schema_version": 1,
+        "search_space": {
+          "gather_statements": 2,
+          "nested_async_producers": 1,
+          "none_sentinel_statements": 2
+        },
+        "selected": [
+          {
+            "adapter": "autogen-cancellation-stream",
+            "contract": "inflight_cancel_must_not_deadlock_stream_consumer",
+            "eligible": true,
+            "function": "_process_model_result",
+            "injection": {
+              "callback": "tool_run",
+              "variants": [
+                "normal_complete",
+                "cancel_inflight"
+              ]
+            },
+            "kind": "cancellation_to_missing_stream_terminator",
+            "negative_control": "identical_tool_completes_without_cancel",
+            "observation": [
+              "tool_started",
+              "stream_terminal",
+              "cancel_propagated",
+              "bounded_timeout"
+            ],
+            "producer": "_execute_tool_calls",
+            "queue_flow": {
+              "consumer_queue": "stream",
+              "producer_queue": "stream_queue"
+            },
+            "sentinel_in_finally": false,
+            "source_file": "python/packages/autogen-agentchat/src/autogen_agentchat/agents/_assistant_agent.py",
+            "source_line": 1200,
+            "terminal_line": 1214,
+            "waiting_consumer": true
+          }
+        ],
+        "soundness_limit": "AST local call reachability is not dynamic control-flow proof",
+        "source_file": "python/packages/autogen-agentchat/src/autogen_agentchat/agents/_assistant_agent.py",
+        "source_sha256": "c0e578fc34be40f46f8e36a91b53fb27cf5ff454f4efb3f4ea5dc1e32d0048c1",
+        "status": "SCENARIO_PLAN_ONLY_NOT_EXECUTION",
+        "unselected_count": 0
+      },
+      "CANCEL_STREAM_NATIVE": {
+        "chosen_source_line": 1200,
+        "claim_limit": "frozen development issue on one upstream commit, not a blind new discovery",
+        "native_result": {
+          "control": {
+            "events": [
+              "ToolCallRequestEvent",
+              "ToolCallExecutionEvent",
+              "Response"
+            ],
+            "exception_type": null,
+            "terminal": "returned",
+            "tool_started": true,
+            "variant": "normal_complete"
+          },
+          "fault": {
+            "events": [
+              "ToolCallRequestEvent"
+            ],
+            "exception_type": null,
+            "terminal": "timeout",
+            "tool_started": true,
+            "variant": "cancel_inflight"
+          },
+          "reason": "cancellation_blocks_stream_until_timeout",
+          "status": "FAIL",
+          "timeout_seconds_per_phase": 1.5
+        },
+        "pinned_source_sha256": "c0e578fc34be40f46f8e36a91b53fb27cf5ff454f4efb3f4ea5dc1e32d0048c1",
+        "producer_function": "_execute_tool_calls",
+        "profile": "autogen-tool-cancellation"
+      }
+    },
+    {
+      "run_id": 38117058477,
+      "job_id": 114403932077,
+      "run_url": "https://github.com/MKLEE222/NLP/actions/runs/38117058477",
+      "job_conclusion": "success",
+      "CAUSAL_CONTROL": {
+        "claim_limit": "in-container patch, NOT merged upstream nor a complete concurrency fix",
+        "original_selected_line": 1200,
+        "original_sentinel_line": 1214,
+        "patched_test_only_sha256": "918208ace598ece8bcb9b0f1414377a0faa529c00389edb9c082e2ec5710f600",
+        "post_plan_eligible": 0,
+        "test_only_transform": "guaranteed_queue_terminator_in_finally",
+        "upstream_original_source_sha256": "c0e578fc34be40f46f8e36a91b53fb27cf5ff454f4efb3f4ea5dc1e32d0048c1"
+      },
+      "PATCHED_NATIVE_CONTROL": {
+        "control": {
+          "events": [
+            "ToolCallRequestEvent",
+            "ToolCallExecutionEvent",
+            "Response"
+          ],
+          "exception_type": null,
+          "terminal": "returned",
+          "tool_started": true,
+          "variant": "normal_complete"
+        },
+        "fault": {
+          "events": [
+            "ToolCallRequestEvent"
+          ],
+          "exception_type": null,
+          "terminal": "cancelled_exception",
+          "tool_started": true,
+          "variant": "cancel_inflight"
+        },
+        "reason": "cancellation_has_bounded_terminal_signal",
+        "status": "PASS",
+        "timeout_seconds_per_phase": 1.5
+      }
+    }
   ]
 }

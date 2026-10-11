@@ -1,0 +1,163 @@
+name: native-trace-and-effect-id-classical-comparison
+on:
+  push:
+    branches: [research/obligation-delta-baselines-20261011]
+    paths:
+      - 'boundary_native/collect_native_healthy_trace.py'
+      - 'boundary_native/issue4125_approved_tool_orphan.py'
+      - 'boundary_native/contract_delta.py'
+      - 'boundary_native/classical_cut_baselines.py'
+      - 'boundary_native/run_source_baseline_matrix.py'
+      - '.github/workflows/native-trace-and-call-identity.yml'
+  workflow_dispatch:
+jobs:
+  healthy-native-source-trace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: autogen
+            repo: microsoft/autogen
+            sha: 027ecf0a379bcc1d09956d46d12d44a3ad9cee14
+            profile: autogen
+            source: python/packages/autogen-agentchat/src/autogen_agentchat/agents/_assistant_agent.py
+          - label: langgraph_original
+            repo: langchain-ai/langgraph
+            sha: b2926a0ff9589c28c7e01fe7cdbb337b86d5a4b4
+            profile: langgraph
+            source: libs/langgraph/langgraph/pregel/_runner.py
+          - label: langgraph_community_patch
+            repo: HUAN2022A/langgraph
+            sha: e0d4ecf9cd5c5bd5a731d72009936aacf8491692
+            profile: langgraph
+            source: libs/langgraph/langgraph/pregel/_runner.py
+    env:
+      PIP_DISABLE_PIP_VERSION_CHECK: '1'
+      PYTHONUNBUFFERED: '1'
+      OPENAI_AGENTS_DISABLE_TRACING: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ matrix.repo }}
+          ref: ${{ matrix.sha }}
+          path: upstream
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Pin actual source and dependency environment
+        run: |
+          test "$(git -C upstream rev-parse HEAD)" = "${{ matrix.sha }}"
+          if [ "${{ matrix.profile }}" = "autogen" ]; then
+            python -m pip install --no-cache-dir -e ./upstream/python/packages/autogen-core
+            python -m pip install --no-cache-dir --no-deps -e ./upstream/python/packages/autogen-agentchat
+            python -m pip install --no-cache-dir --no-deps -e ./upstream/python/packages/autogen-ext
+          else
+            python -m pip install --no-cache-dir -e ./upstream/libs/langgraph
+          fi
+          python -m pip freeze > native_trace_${{ matrix.label }}_environment.txt
+      - name: Collect true native healthy source lines, no injected fault
+        run: |
+          mkdir -p trace_comparison
+          timeout --signal=TERM --kill-after=8s 90s python boundary_native/collect_native_healthy_trace.py \
+            --root upstream --profile ${{ matrix.profile }} --timeout 1.5 \
+            --output trace_comparison/normal_trace_${{ matrix.label }}.json
+      - name: Compare all methods on EXACT same source and real healthy trace
+        run: |
+          python boundary_native/run_source_baseline_matrix.py \
+            --source upstream/${{ matrix.source }} \
+            --catalog boundary_native/normative_contracts_development_v1.json \
+            --adapters boundary_native/trusted_native_adapters_development_v1.json \
+            --normal-trace trace_comparison/normal_trace_${{ matrix.label }}.json \
+            --budget 2 --output trace_comparison/source_${{ matrix.label }}.json
+      - name: Retain true trace, method plans and installation footprint
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: healthy-trace-${{ matrix.label }}
+          path: |
+            trace_comparison/
+            native_trace_${{ matrix.label }}_environment.txt
+          if-no-files-found: warn
+          retention-days: 14
+  native-approved-effect-identities:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - phase: before
+            sha: 6e2095d918a3875ba367ccbd9cc03ecb70ce2986
+          - phase: after
+            sha: 9d894a9032e8d373f8b54d81591db36ce75b315d
+    env:
+      OPENAI_AGENTS_DISABLE_TRACING: '1'
+      PYTHONUNBUFFERED: '1'
+      PIP_DISABLE_PIP_VERSION_CHECK: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: openai/openai-agents-python
+          ref: ${{ matrix.sha }}
+          path: upstream
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install real public SDK at historical lock-compatible version
+        run: |
+          test "$(git -C upstream rev-parse HEAD)" = "${{ matrix.sha }}"
+          python -m pip install --no-cache-dir -e upstream
+          python -m pip install --no-cache-dir 'openai==2.45.0'
+          python -m pip freeze > effect_ids_${{ matrix.phase }}_environment.txt
+      - name: Run native approved tool with actual persisted call ID receipts
+        run: |
+          mkdir -p effect_id_receipts
+          timeout --signal=TERM --kill-after=8s 240s python boundary_native/issue4125_approved_tool_orphan.py \
+            --upstream-root upstream --upstream-commit ${{ matrix.sha }} \
+            --phase ${{ matrix.phase }} \
+            --output effect_id_receipts/approved_tool_${{ matrix.phase }}.json
+      - name: Validate exact persisted identity with the new contract oracle
+        run: |
+          python - <<'PY'
+          import json,sys
+          from pathlib import Path
+          sys.path.insert(0,'boundary_native')
+          from contract_delta import judge_native
+          data=json.loads(Path('effect_id_receipts/approved_tool_${{ matrix.phase }}.json').read_text())
+          catalog=json.loads(Path('boundary_native/normative_contracts_development_v1.json').read_text())
+          cases={(r['mode'],r['tripwire']):r for r in data['cases']}
+          n={'observation_origin':'native','authorized':True,'control_valid':True,'identity':'local_approved_call'}
+          f={'observation_origin':'native','authorized':True,'fault_triggered':True,'identity':'local_approved_call'}
+          good=cases[('streamed',False)]
+          stressed=cases[('streamed',True)]
+          n['control_valid']=(good['status']=='ok' and good['tool_executions']==1 and good['paired'])
+          f['tool_execution_count']=stressed['tool_executions']
+          f['committed_call_ids']=stressed['session_call_ids']
+          f['persisted_result_ids']=stressed['session_output_ids']
+          verdict=judge_native('approved_tool_result_persisted',n,f,catalog).to_dict()
+          print('NATIVE_EXACT_EFFECT_ID_JUDGMENT',json.dumps(verdict,sort_keys=True))
+          Path('effect_id_receipts/contract_${{ matrix.phase }}.json').write_text(json.dumps(verdict,indent=2)+'\n')
+          expected='FAIL' if '${{ matrix.phase }}'=='before' else 'PASS'
+          if verdict['status']!=expected:
+            raise SystemExit('Actual call-id contract evidence differs from preregistered expected version')
+          PY
+      - name: Retain raw session evidence and normalized independent judgment
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: approved-effect-ids-${{ matrix.phase }}
+          path: |
+            effect_id_receipts/
+            effect_ids_${{ matrix.phase }}_environment.txt
+          if-no-files-found: warn
+          retention-days: 14

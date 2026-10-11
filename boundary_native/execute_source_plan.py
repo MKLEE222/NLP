@@ -1,0 +1,358 @@
+"""Execute an automatically planned, bounded native SDK failure-boundary probe.
+
+Profiles are explicit, separately reviewable adapters. The plan chooses legal
+fault variants and a source location; adapters provide SDK-specific objects.
+No LLM endpoint, remote tool, or production side effect is reachable.
+Independent runtime verdicts do not read source handler labels.
+"""
+from __future__ import annotations
+
+import argparse
+import asyncio
+import concurrent.futures
+import json
+import sys
+import weakref
+from pathlib import Path
+
+from source_guided_synth import verify_pinned_source
+
+
+async def _agent_case(fault: str):
+    from agents import Agent, GuardrailFunctionOutput, OutputGuardrail, Runner
+    from tests.fake_model import FakeModel
+    from tests.test_responses import get_text_message
+
+    def guardrail(*args):
+        if fault=="raise_RuntimeError":
+            raise RuntimeError("source_generated_exception")
+        return GuardrailFunctionOutput(output_info=None, tripwire_triggered=False)
+
+    agent=Agent(name="source-generated-local-fixture",
+                model=FakeModel(initial_output=[get_text_message("fixture_answer")]),
+                output_guardrails=[OutputGuardrail(guardrail_function=guardrail)])
+    result=Runner.run_streamed(agent, input="fixture_input")
+    exc_type=None
+    try:
+        await result.run_loop_task
+    except Exception as e:
+        exc_type=type(e).__name__
+    return {
+        "variant":fault,
+        "caught_exception":exc_type,
+        "final_output_accepted":result.final_output is not None,
+        "is_complete":bool(result.is_complete),
+    }
+
+
+async def _run_agents(candidate):
+    variants=candidate["injection"]["variants"]
+    if variants!=["pass","raise_RuntimeError"]:
+        raise ValueError("plan requires unsupported guardrail variants")
+    control=await _agent_case(variants[0])
+    fault=await _agent_case(variants[1])
+    if control["caught_exception"] is not None or not control["final_output_accepted"]:
+        return {"status":"UNKNOWN","reason":"invalid_pass_control",
+                "control":control,"fault":fault}
+    violation=fault["final_output_accepted"] or fault["caught_exception"]!="RuntimeError"
+    return {
+        "status":"FAIL" if violation else "PASS",
+        "reason":("exception_swallowed_or_output_accepted" if violation
+                  else "exception_propagated_and_final_rejected"),
+        "control":control,"fault":fault,
+    }
+
+
+async def _approved_tool_case(mode, trip):
+    """Drive the two legal entrypoints with one approved local fake tool."""
+    from typing import Any
+    from agents import (
+        Agent, GuardrailFunctionOutput, ModelSettings, OutputGuardrail,
+        OutputGuardrailTripwireTriggered, RunContextWrapper, Runner, function_tool,
+    )
+    from tests.fake_model import FakeModel
+    from tests.test_responses import get_function_tool_call
+    from tests.utils.simple_session import SimpleListSession
+
+    tool_count=0
+
+    @function_tool(name_override="fixture_tool",needs_approval=True)
+    def fixture_tool(query:str)->str:
+        nonlocal tool_count
+        tool_count+=1
+        return "LOCALLY_EXECUTED"
+
+    async def guardrail(ctx:RunContextWrapper[Any],agent:Agent[Any],out:Any):
+        return GuardrailFunctionOutput(output_info=None,tripwire_triggered=trip)
+
+    session=SimpleListSession()
+    model=FakeModel()
+    model.set_next_output([get_function_tool_call(
+        "fixture_tool",'{"query":"local"}',call_id="source-plan-call")])
+    agent=Agent(name="source-generated-approval",model=model,tools=[fixture_tool],
+                model_settings=ModelSettings(tool_choice="fixture_tool"),
+                tool_use_behavior="stop_on_first_tool",
+                output_guardrails=[OutputGuardrail(guardrail_function=guardrail)])
+
+    async def execute(inp):
+        if mode=="run":
+            return await Runner.run(agent,inp,session=session)
+        s=Runner.run_streamed(agent,inp,session=session)
+        async for _ in s.stream_events():
+            pass
+        return s
+
+    first=await execute("Local approval fixture")
+    if not first.interruptions:
+        raise RuntimeError("missing documented approval interruption")
+    state=first.to_state()
+    state.approve(first.interruptions[0])
+    status="ok"
+    try:
+        await execute(state)
+    except OutputGuardrailTripwireTriggered:
+        status="blocked"
+    items=await session.get_items()
+    calls=[x for x in items if isinstance(x,dict) and x.get("type")=="function_call"]
+    outputs=[x for x in items if isinstance(x,dict)
+             and x.get("type")=="function_call_output"]
+    return {
+        "variant":mode+("_trip" if trip else "_pass"),
+        "mode":mode,"tripwire":trip,"status":status,"tool_executions":tool_count,
+        "session_call_count":len(calls),"session_output_count":len(outputs),
+        "call_ids":[x.get("call_id") for x in calls],
+        "output_ids":[x.get("call_id") for x in outputs],
+    }
+
+
+async def _run_approved(candidate):
+    cases={}
+    for trip in (False,True):
+        for mode in ("run","streamed"):
+            x=await _approved_tool_case(mode,trip)
+            cases[(mode,trip)]=x
+    controls=[cases[(mode,False)]["status"]=="ok" for mode in ("run","streamed")]
+    controls.extend(cases[(mode,False)]["session_output_count"]==1
+                    for mode in ("run","streamed"))
+    controls.extend(x["tool_executions"]==1 and x["session_call_count"]==1
+                    for x in cases.values())
+    if not all(controls):
+        return {"status":"UNKNOWN","reason":"invalid_mode_or_tool_control",
+                "cases":list(cases.values())}
+    problems=[]
+    for (mode,trip),x in cases.items():
+        if x["status"]!=("blocked" if trip else "ok"):
+            problems.append(mode+":"+str(trip)+":wrong_guardrail_status")
+        if x["output_ids"]!=x["call_ids"]:
+            problems.append(mode+":"+str(trip)+":persisted_call_result_mismatch")
+    return {
+        "status":"FAIL" if problems else "PASS",
+        "reason":",".join(problems) if problems else "approved_effect_persisted",
+        "cases":list(cases.values()),
+    }
+
+
+def _langgraph_case(same):
+    from langgraph._internal._constants import CONF, CONFIG_KEY_SCRATCHPAD
+    from langgraph.pregel._runner import _call
+
+    class Task:
+        pass
+
+    class Map(dict):
+        pass
+
+    class Scratch:
+        def __init__(self):
+            self.i=0
+        def call_counter(self):
+            self.i+=1
+            return self.i
+
+    parent=Task()
+    parent.id="parent-logical"
+    parent.config={CONF:{CONFIG_KEY_SCRATCHPAD:Scratch()}}
+    existing=Task()
+    existing.id="logical-child-A"
+    existing.writes=[]
+    next_child=Task()
+    next_child.id="logical-child-A" if same else "independent-child-B"
+    next_child.writes=[]
+    pending=Map()
+    previous=concurrent.futures.Future()
+    pending[previous]=existing
+    admitted=[]
+
+    def schedule_task(parent_task,counter,call):
+        return next_child
+
+    def submit(*args,**kwargs):
+        admitted.append(next_child.id)
+        return concurrent.futures.Future()
+
+    chain=_call(weakref.ref(parent),lambda _:None,None,
+                futures=weakref.ref(pending),
+                schedule_task=schedule_task,submit=weakref.ref(submit))
+    return {
+        "variant":"same_logical_id" if same else "different_logical_id",
+        "original_future_pending":not previous.done(),
+        "admissions":len(admitted),
+        "returned_future_pending":not chain.done(),
+    }
+
+
+def _run_langgraph(candidate):
+    variants=candidate["injection"]["variants"]
+    if variants!=["same_logical_id","different_logical_id"]:
+        raise ValueError("plan requires unsupported admission variants")
+    same=_langgraph_case(True)
+    different=_langgraph_case(False)
+    if not (same["original_future_pending"] and different["original_future_pending"]
+            and different["admissions"]==1):
+        return {"status":"UNKNOWN","reason":"invalid_different_id_control",
+                "same":same,"different":different}
+    violation=same["admissions"]>0
+    return {
+        "status":"FAIL" if violation else "PASS",
+        "reason":"duplicate_inflight_child_admitted" if violation else "pending_child_reused",
+        "same":same,"different":different,
+    }
+
+
+async def _langgraph_async_case(same):
+    from langgraph._internal._constants import CONF, CONFIG_KEY_SCRATCHPAD
+    from langgraph.pregel._runner import _acall_impl
+
+    class Task:
+        pass
+    class Map(dict):
+        pass
+    class Scratch:
+        def __init__(self):
+            self.i=0
+        def call_counter(self):
+            self.i+=1
+            return self.i
+
+    loop=asyncio.get_running_loop()
+    parent=Task()
+    parent.id="parent-logical"
+    parent.config={CONF:{CONFIG_KEY_SCRATCHPAD:Scratch()}}
+    existing=Task()
+    existing.id="logical-child-A"
+    existing.name="old-child"
+    existing.writes=[]
+    next_child=Task()
+    next_child.id="logical-child-A" if same else "independent-child-B"
+    next_child.name="next-child"
+    next_child.writes=[]
+    pending=Map()
+    previous=loop.create_future()
+    pending[previous]=existing
+    destination=loop.create_future()
+    admitted=[]
+
+    async def schedule_task(parent_task,counter,call):
+        return next_child
+
+    def submit(*args,**kwargs):
+        admitted.append(next_child.id)
+        return loop.create_future()
+
+    await _acall_impl(
+        destination,weakref.ref(parent),lambda _:None,None,
+        futures=weakref.ref(pending),schedule_task=schedule_task,
+        submit=weakref.ref(submit),loop=loop)
+    err_type=None
+    if destination.done():
+        try:
+            destination.result()
+        except BaseException as e:
+            err_type=type(e).__name__
+    return {
+        "variant":"same_logical_id" if same else "different_logical_id",
+        "original_future_pending":not previous.done(),
+        "admissions":len(admitted),
+        "returned_future_pending":not destination.done(),
+        "exception_type":err_type,
+    }
+
+
+async def _run_langgraph_async(candidate):
+    variants=candidate["injection"]["variants"]
+    if variants!=["same_logical_id","different_logical_id"]:
+        raise ValueError("bad async admission source plan")
+    same=await _langgraph_async_case(True)
+    different=await _langgraph_async_case(False)
+    if not (same["original_future_pending"] and different["original_future_pending"]
+            and different["admissions"]==1
+            and same["exception_type"] is None and different["exception_type"] is None):
+        return {"status":"UNKNOWN","reason":"invalid_async_negative_control",
+                "same":same,"different":different}
+    violation=same["admissions"]>0
+    return {"status":"FAIL" if violation else "PASS",
+            "reason":"duplicate_inflight_child_admitted" if violation else "pending_child_reused",
+            "same":same,"different":different}
+
+
+def run(root:Path,plan:dict):
+    verify_pinned_source(root,plan)
+    selected=plan["selected"]
+    if not selected or len(selected)>2:
+        raise ValueError("one or two pinned source scenarios required")
+    if any(not x.get("eligible") or x["adapter"]!=plan["adapter"] for x in selected):
+        raise ValueError("unsupported/invalid generated case")
+    if plan["profile"]=="agents-guardrail":
+        if len(selected)!=1:
+            raise ValueError("guardrail adapter only admits one test")
+        sys.path.insert(0,str(root.resolve()))
+        outcomes=[asyncio.run(_run_agents(selected[0]))]
+    elif plan["profile"]=="agents-approved-persistence":
+        if len(selected)!=1:
+            raise ValueError("approval adapter only admits one test")
+        sys.path.insert(0,str(root.resolve()))
+        outcomes=[asyncio.run(_run_approved(selected[0]))]
+    else:
+        sys.path.insert(0,str(root.resolve()/"libs"/"langgraph"))
+        outcomes=[]
+        for case in selected:
+            if case["is_async"]:
+                outcomes.append(asyncio.run(_run_langgraph_async(case)))
+            else:
+                outcomes.append(_run_langgraph(case))
+    statuses=[x["status"] for x in outcomes]
+    total_status=("UNKNOWN" if "UNKNOWN" in statuses
+                  else "FAIL" if "FAIL" in statuses else "PASS")
+    return {
+        "source_profile":plan["profile"],
+        "source_file":plan["source_file"],
+        "source_sha256":plan["source_sha256"],
+        "generated_at_function":[x["function"] for x in selected],
+        "generated_at_line":[x["source_line"] for x in selected],
+        "source_hint":[x.get("handler_exit",x.get("comparison",x.get("source_inferred_order")))
+                       for x in selected],
+        "plan_status":plan["status"],
+        "runtime_result":{"status":total_status,
+                          "subcases":outcomes,
+                          "executed_source_sites":len(outcomes)},
+        "evidence_limit":"known-profile source-directed cases, not general arbitrary-source synthesis",
+    }
+
+
+def main():
+    p=argparse.ArgumentParser()
+    p.add_argument("--upstream-root",required=True)
+    p.add_argument("--plan",required=True)
+    p.add_argument("--output",required=True)
+    args=p.parse_args()
+    outcome=run(Path(args.upstream_root),json.loads(Path(args.plan).read_text()))
+    dest=Path(args.output)
+    dest.parent.mkdir(parents=True,exist_ok=True)
+    dest.write_text(json.dumps(outcome,indent=2,sort_keys=True)+"\n")
+    print("SOURCE_PLAN_EXEC",json.dumps(outcome,sort_keys=True),flush=True)
+    if outcome["runtime_result"]["status"]=="UNKNOWN":
+        raise SystemExit("INVALID_NATIVE_CONTROL_OR_UNKNOWN_CONTRACT")
+
+
+if __name__=="__main__":
+    main()

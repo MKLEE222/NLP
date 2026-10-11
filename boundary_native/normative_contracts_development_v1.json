@@ -1,0 +1,62 @@
+{
+  "schema": "normative_obligations_v1",
+  "contract_origin": "reviewed public issue and associated SDK behavior; NOT automatic standards/authority inference",
+  "obligations": {
+    "stream_terminal_delivery": {
+      "authority_url": "https://github.com/microsoft/autogen/issues/7956",
+      "authority_scope": "only local streamed tool fixture; cancellation must have bounded terminal/cancel propagation (1.5s research bound)",
+      "side_effect_permission": "local_only",
+      "legal_fault_variants": [
+        "cancel_at_producer_await"
+      ],
+      "required_runtime_fields": [
+        "tool_started",
+        "normal_terminal",
+        "cancel_bounded_terminal",
+        "timeout_limit"
+      ],
+      "identity_requirement": "same producer/consumer queue instance"
+    },
+    "inflight_logical_task_not_reissued": {
+      "authority_url": "https://github.com/langchain-ai/langgraph/issues/8393",
+      "authority_scope": "only pending logical task scheduling admission; does NOT guarantee exactly once external tool",
+      "side_effect_permission": "local_only",
+      "legal_fault_variants": [
+        "retry_with_same_logical_task_id"
+      ],
+      "required_runtime_fields": [
+        "original_child_pending",
+        "same_id_extra_admissions",
+        "independent_id_admissions"
+      ],
+      "identity_requirement": "logical task ID, never Python object identity"
+    },
+    "approved_tool_result_persisted": {
+      "authority_url": "https://github.com/openai/openai-agents-python/issues/4125",
+      "authority_scope": "only locally executed human-approved tool, session persistence; requires verified durable call/result IDs",
+      "side_effect_permission": "local_only",
+      "legal_fault_variants": [
+        "output_guardrail_trip_after_approval"
+      ],
+      "required_runtime_fields": [
+        "committed_call_ids",
+        "persisted_result_ids",
+        "tool_execution_count"
+      ],
+      "identity_requirement": "same exact call_id in persisted call/output"
+    },
+    "output_guardrail_fail_closed": {
+      "authority_url": "https://github.com/openai/openai-agents-python/issues/3280",
+      "authority_scope": "only streamed output guardrail ordinary exception; forbid accepted final output",
+      "side_effect_permission": "local_only",
+      "legal_fault_variants": [
+        "raise_RuntimeError"
+      ],
+      "required_runtime_fields": [
+        "accepted_final",
+        "exception_propagated"
+      ],
+      "identity_requirement": "same agent run"
+    }
+  }
+}

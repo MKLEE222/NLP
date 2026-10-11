@@ -45,6 +45,14 @@ jobs:
           echo "requested: ${{ matrix.sha }}"
           test "$(git -C upstream rev-parse HEAD)" = "${{ matrix.sha }}"
           python -m pip install --no-cache-dir -e upstream
+          # SDK's pinned historical uv.lock on the pre-fix commit resolves openai=2.26.0.
+          # The freely upgraded package changed usage InputTokensDetails and breaks both phases.
+          python -m pip install --no-cache-dir 'openai==2.26.0'
+          python - <<'PY'
+          from importlib.metadata import version
+          assert version("openai") == "2.26.0"
+          print("Historical lock-compatible openai package:", version("openai"))
+          PY
           python -m pip freeze > sdk_pip_freeze_${{ matrix.phase }}.txt
           python -m compileall -q boundary_native
       - name: Execute published issue 3280 without LLM API

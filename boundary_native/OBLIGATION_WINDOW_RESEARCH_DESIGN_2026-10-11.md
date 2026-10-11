@@ -106,14 +106,14 @@ is **classical maximum coverage**, not a novelty claim. A future original algori
 6. Optionally test a narrowly sourced local discharge-edge intervention to rule out alternate causes. This is corroborating evidence, not a novel counterfactual principle.
 7. Choose candidate windows at fixed execution and human-setup cost; report misses and invalid/UNKNOWN attempts as denominators.
 
-This is a *mechanism hypothesis with a limited implementation*. The shared compiler currently supports **stream-terminal obligation** only. The author-installed native adapter for AutoGen is still manual and was written AFTER seeing a development issue. Other obligation types exist in the older issue-specific scripts but have NOT been generalized into this compiler.
+This is a *mechanism hypothesis with a limited implementation*. The shared compiler now supports **stream-terminal and in-flight logical-task identity** obligations. Human-approval and durable-result obligation extraction remain open. The author-installed native adapter for AutoGen is still manual and was written AFTER seeing a development issue. Other obligation types exist in the older issue-specific scripts but have NOT been generalized into this compiler.
 
 ## 5. Implemented v0, verified limitations, honest observed evidence
 
 - **obligation_window_kernel.py**: scans arbitrary Python source, independent of upstream repo path/issue ID, for nested async producer, actual create_task formal→actual argument identity, awaiting consumer queue, abortable producer await and a normal-only None terminal notification. Emits plan and source SHA. No static BUG label.
-- **native_window_executor.py**: regenerates candidate from source, checks plan was not forged, and permits one trusted local AutoGen adapter to execute its proposed normal/cancel pair.
+- **native_window_executor.py**: regenerates candidate from source, checks plan was not forged, and permits one trusted local AutoGen adapter for normal/cancel tests; a separate already-audited LangGraph adapter is used by the CI for logical-task identity.
 - **test_obligation_window_kernel.py**: a tiny adversarial synthetic corpus and unit checks for finally, mismatched queues, no consumer/task, keyword args, alternate producer/await name and source tampering. First-cut version admitted an await after an unconditional return; it was repaired by simple block-local control-transfer pruning, and queue alias rebinding after task spawn is now excluded. This is *not* full interprocedural reachability.
-- CI: https://github.com/MKLEE222/NLP/actions/runs/38117548112 : 36 tests, native real pinned AutoGen source selected 1 window at await line 1200 and discharge line 1214, normal local replay passed; cancellation timed out at 1.5s. Separately created local causal patch discharging in finally produced 0 candidates. This is **one known upstream development issue**, not an unseen discovery.
+- CI: https://github.com/MKLEE222/NLP/actions/runs/38117548112 : 41 tests on the two-type head, with native real pinned AutoGen source selecting 1 window at await line 1200 and discharge line 1214, normal local replay passed; cancellation timed out at 1.5s. Separately created local causal patch discharging in finally produced 0 candidates. This is **one known upstream development issue**, not an unseen discovery.
 
 The comparison against a token-cooccurrence source scanner in unit tests is intentionally **weak sanity checking**. It does not establish lift over FailMapper, mature stateful/property testing, fault injectors, concurrency schedule tools or modern oracle inference.
 
@@ -151,3 +151,19 @@ Latest CI with both native execution and all regression tests:
 https://github.com/MKLEE222/NLP/actions/runs/38117748435
 
 Frozen 12 issue-confirmation records remain unopened. A possible next method improvement is typed activation/discharge across approval use and durable effect receipts, *but only if the same generic analyzer compiles them without a special bug-ID branch, with matched negative controls*.
+
+
+## 9. Second genuinely different obligation type in the SAME generic compiler
+
+Added source-type detection for **in-flight logical task identity admission**, not based on a fixed repository path or an Issue number. It reads an existing future→task collection, a scheduled candidate with a logical identifier, and the comparison that selects a pending same-ID task. It emits a typed, provenance-bound test plan for BOTH variants: object-vs-ID in historical buggy code and ID-vs-ID in the community patch. **Source alone returns TEST_PLAN_ONLY for both**; comparison syntax is not used to pre-label BUG/PASS. Its fault/control contract is: retry with the same logical task ID versus retry with a distinct ID, and count admissions while the old child remains in flight.
+
+This type shares the same source-hash binding, plan regeneration, obligation-diverse budget selector and three-valued evidence principle with the async stream-terminal type. It is source-generic *within two recognized structural motifs*, not a universal Python compiler.
+
+Actual [four-job run](https://github.com/MKLEE222/NLP/actions/runs/38117897011):
+- Static/unit integrity suite: **41 tests PASS**. New tests cover both sync and async task guard sites, old and repaired comparison patterns, irrelevant-cache and unrelated-ID controls, and forged-plan rejection. Curated snippets are synthetic structural examples, not independent real bugs.
+- Actual LangGraph historical upstream source SHA b2926a0...: **two source sites** emitted (_call and _acall_impl), object-vs-ID. Existing real native _call retry with same logical child ID admitted another child (FAIL); distinct-ID negative control admitted normally.
+- Community LangGraph code SHA e0d4ecf...: the **same two source sites** emitted with ID-vs-ID, and same real native _call test suppressed repeated child admission while distinct-ID control remained legal (PASS). This community PR is **closed UNMERGED**, not an official upstream merged fix.
+- Actual pinned AutoGen source SHA 027ecf0...: one stream completion window, control normally returned while cancellation timed out at 1.5 seconds (FAIL); local causal finally intervention yielded zero missing-sentinel windows. This is the same pre-registered development issue already reported publicly.
+- Full run/job IDs, source SHA256, native raw event observations and synthetic-test receipt are frozen in **obligation_window_native_evidence_20261011.json**. Denominator of this run: **2 distinct previously reported upstream issues, 2 frameworks, 3 source versions; 5 source-site/version candidates** (not 5 independent bugs). The earlier source-guided CI also exercised LangGraph _acall_impl, but this new four-job run natively invoked _call only; don't conflate.
+
+The two-type pipeline is a real improvement to software organization and native evidence validation, but there is still **no externally validated algorithm superiority**. Both failure classes were inspected during development, no new bug was discovered, and the detectors were designed with those known source patterns in view. This is not independent cross-framework issue-blind transfer. The twelve preregistered confirmation issues remain sealed.

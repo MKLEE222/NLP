@@ -148,6 +148,8 @@ def source_to_obligation_plans(
                   and hashlib.sha256(source.encode("utf-8")).hexdigest()
                   in supported_adapters["adapters"][kind].get("source_sha256", [])):
             static_status,reason="UNKNOWN","adapter_not_authorized_for_exact_source"
+        elif cut["caller"] not in supported_adapters["adapters"][kind].get("supported_callers", []):
+            static_status,reason="UNKNOWN","source_callable_not_executable_by_native_adapter"
         elif cut["fault"] not in norm["legal_fault_variants"]:
             static_status,reason="UNKNOWN","fault_not_licensed_by_normative_contract"
         # The higher-order adapter MUST still check actual admission/rights.

@@ -1,0 +1,266 @@
+{
+  "dataset": "six-actual-native-upstream-traces-before_after",
+  "evidence_semantics": "github-actions-logs-extracted-not-synthetic",
+  "captured_date": "2026-10-11",
+  "rows": [
+    {
+      "run": 38114666257,
+      "job": 114397073254,
+      "channel": "guardrail_exception",
+      "observation": {
+        "contract": "raised output guardrail exception must not be treated as success",
+        "control": {
+          "caught_exception": null,
+          "exception_injected": false,
+          "exception_message_sha16": null,
+          "final_output_accepted": true,
+          "final_output_value_sha16": "fbcf91596caf1d85",
+          "is_complete": true
+        },
+        "execution": "native-installed-upstream-deterministic-FakeModel",
+        "fault": {
+          "caught_exception": "RuntimeError",
+          "exception_injected": true,
+          "exception_message_sha16": "15758431fb07d979",
+          "final_output_accepted": false,
+          "final_output_value_sha16": null,
+          "is_complete": true
+        },
+        "historical_issue": "https://github.com/openai/openai-agents-python/issues/3280",
+        "merge_fix": "https://github.com/openai/openai-agents-python/pull/3281",
+        "not_a_claim": "single published bug reproduction; no new causal testing algorithm",
+        "source": "openai/openai-agents-python",
+        "status": "EXECUTED_NATIVE_HISTORICAL_VERSION",
+        "upstream_commit": "4a3d33e44fcd5051ff1b08f136ca61aef7824e63",
+        "validation": "EXPECTED_FIXED_EXCEPTION_PROPAGATION"
+      }
+    },
+    {
+      "run": 38114666257,
+      "job": 114397073359,
+      "channel": "guardrail_exception",
+      "observation": {
+        "contract": "raised output guardrail exception must not be treated as success",
+        "control": {
+          "caught_exception": null,
+          "exception_injected": false,
+          "exception_message_sha16": null,
+          "final_output_accepted": true,
+          "final_output_value_sha16": "fbcf91596caf1d85",
+          "is_complete": true
+        },
+        "execution": "native-installed-upstream-deterministic-FakeModel",
+        "fault": {
+          "caught_exception": null,
+          "exception_injected": true,
+          "exception_message_sha16": null,
+          "final_output_accepted": true,
+          "final_output_value_sha16": "fbcf91596caf1d85",
+          "is_complete": true
+        },
+        "historical_issue": "https://github.com/openai/openai-agents-python/issues/3280",
+        "merge_fix": "https://github.com/openai/openai-agents-python/pull/3281",
+        "not_a_claim": "single published bug reproduction; no new causal testing algorithm",
+        "source": "openai/openai-agents-python",
+        "status": "EXECUTED_NATIVE_HISTORICAL_VERSION",
+        "upstream_commit": "683b6e79e5b4a2e3fc3cac80b556101ce778beae",
+        "validation": "EXPECTED_HISTORICAL_FAIL_OPEN"
+      }
+    },
+    {
+      "run": 38114794512,
+      "job": 114397437171,
+      "channel": "approved_result",
+      "observation": {
+        "cases": [
+          {
+            "mode": "run",
+            "orphaned": false,
+            "paired": true,
+            "session_types": [
+              "user",
+              "function_call",
+              "function_call_output"
+            ],
+            "status": "ok",
+            "tool_executions": 1,
+            "tripwire": false
+          },
+          {
+            "mode": "streamed",
+            "orphaned": false,
+            "paired": true,
+            "session_types": [
+              "user",
+              "function_call",
+              "function_call_output"
+            ],
+            "status": "ok",
+            "tool_executions": 1,
+            "tripwire": false
+          },
+          {
+            "mode": "run",
+            "orphaned": false,
+            "paired": true,
+            "session_types": [
+              "user",
+              "function_call",
+              "function_call_output"
+            ],
+            "status": "blocked",
+            "tool_executions": 1,
+            "tripwire": true
+          },
+          {
+            "mode": "streamed",
+            "orphaned": true,
+            "paired": false,
+            "session_types": [
+              "user",
+              "function_call"
+            ],
+            "status": "blocked",
+            "tool_executions": 1,
+            "tripwire": true
+          }
+        ],
+        "fix": "https://github.com/openai/openai-agents-python/pull/4126",
+        "issue": "https://github.com/openai/openai-agents-python/issues/4125",
+        "limits": "one published human-approved local fake tool, no remote effects or novel method",
+        "source": "openai/openai-agents-python",
+        "state": "NATIVE_HISTORICAL_VERSION",
+        "upstream_commit": "6e2095d918a3875ba367ccbd9cc03ecb70ce2986",
+        "validation": "EXPECTED_HISTORICAL_STREAM_ORPHAN"
+      }
+    },
+    {
+      "run": 38114794512,
+      "job": 114397437302,
+      "channel": "approved_result",
+      "observation": {
+        "cases": [
+          {
+            "mode": "run",
+            "orphaned": false,
+            "paired": true,
+            "session_types": [
+              "user",
+              "function_call",
+              "function_call_output"
+            ],
+            "status": "ok",
+            "tool_executions": 1,
+            "tripwire": false
+          },
+          {
+            "mode": "streamed",
+            "orphaned": false,
+            "paired": true,
+            "session_types": [
+              "user",
+              "function_call",
+              "function_call_output"
+            ],
+            "status": "ok",
+            "tool_executions": 1,
+            "tripwire": false
+          },
+          {
+            "mode": "run",
+            "orphaned": false,
+            "paired": true,
+            "session_types": [
+              "user",
+              "function_call",
+              "function_call_output"
+            ],
+            "status": "blocked",
+            "tool_executions": 1,
+            "tripwire": true
+          },
+          {
+            "mode": "streamed",
+            "orphaned": false,
+            "paired": true,
+            "session_types": [
+              "user",
+              "function_call",
+              "function_call_output"
+            ],
+            "status": "blocked",
+            "tool_executions": 1,
+            "tripwire": true
+          }
+        ],
+        "fix": "https://github.com/openai/openai-agents-python/pull/4126",
+        "issue": "https://github.com/openai/openai-agents-python/issues/4125",
+        "limits": "one published human-approved local fake tool, no remote effects or novel method",
+        "source": "openai/openai-agents-python",
+        "state": "NATIVE_HISTORICAL_VERSION",
+        "upstream_commit": "9d894a9032e8d373f8b54d81591db36ce75b315d",
+        "validation": "EXPECTED_FIXED_APPROVED_EFFECT_PAIR"
+      }
+    },
+    {
+      "run": 38115012574,
+      "job": 114398064421,
+      "channel": "inflight_dedup",
+      "observation": {
+        "different_id_negative_control": {
+          "candidate_child_id": "child-B",
+          "logical_id_same": false,
+          "new_child_admissions": 1,
+          "original_child_id": "child-A",
+          "original_pending_future": true,
+          "returned_future_done": false
+        },
+        "issue": "https://github.com/langchain-ai/langgraph/issues/8393",
+        "patch_pr": "https://github.com/langchain-ai/langgraph/pull/8485",
+        "patch_status": "closed_unmerged_community_code",
+        "same_id": {
+          "candidate_child_id": "child-A",
+          "logical_id_same": true,
+          "new_child_admissions": 0,
+          "original_child_id": "child-A",
+          "original_pending_future": true,
+          "returned_future_done": false
+        },
+        "scope": "duplicate child scheduling admission only; no external effect executed",
+        "source": "langchain-ai/langgraph",
+        "source_sha": "e0d4ecf9cd5c5bd5a731d72009936aacf8491692",
+        "verdict": "EXPECTED_DEDUP_ADMISSION"
+      }
+    },
+    {
+      "run": 38115012574,
+      "job": 114398064590,
+      "channel": "inflight_dedup",
+      "observation": {
+        "different_id_negative_control": {
+          "candidate_child_id": "child-B",
+          "logical_id_same": false,
+          "new_child_admissions": 1,
+          "original_child_id": "child-A",
+          "original_pending_future": true,
+          "returned_future_done": false
+        },
+        "issue": "https://github.com/langchain-ai/langgraph/issues/8393",
+        "patch_pr": "https://github.com/langchain-ai/langgraph/pull/8485",
+        "patch_status": "closed_unmerged_community_code",
+        "same_id": {
+          "candidate_child_id": "child-A",
+          "logical_id_same": true,
+          "new_child_admissions": 1,
+          "original_child_id": "child-A",
+          "original_pending_future": true,
+          "returned_future_done": false
+        },
+        "scope": "duplicate child scheduling admission only; no external effect executed",
+        "source": "langchain-ai/langgraph",
+        "source_sha": "b2926a0ff9589c28c7e01fe7cdbb337b86d5a4b4",
+        "verdict": "EXPECTED_DUPLICATE_ADMISSION"
+      }
+    }
+  ]
+}

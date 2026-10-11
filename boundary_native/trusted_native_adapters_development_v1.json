@@ -1,0 +1,23 @@
+{
+  "schema": "trusted_local_adapters_v1",
+  "rights_limit": "Only deterministic local tool/LLM mocks with GitHub Actions recorded source. No remote providers.",
+  "adapters": {
+    "stream_terminal_delivery": {
+      "local_only": true,
+      "tool": "boundary_native/native_window_executor.py",
+      "source_sha256": [
+        "c0e578fc34be40f46f8e36a91b53fb27cf5ff454f4efb3f4ea5dc1e32d0048c1"
+      ],
+      "review_note": "AutoGen dev source only, not arbitrary future framework code"
+    },
+    "inflight_logical_task_not_reissued": {
+      "local_only": true,
+      "tool": "boundary_native/issue8393_langgraph_child_admission.py",
+      "source_sha256": [
+        "316cf133c724163a18ef279322615588b3fa8b96e359289a7cadea90f0df7622",
+        "86d57dd543635c9b91e212f8eeb5b74571e2f1828a64f3d2d47b31f54c651f64"
+      ],
+      "review_note": "LangGraph old and unmerged community fix, same logical test"
+    }
+  }
+}

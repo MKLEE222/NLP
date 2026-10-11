@@ -12,11 +12,11 @@ SYNTHETIC_CANCEL="""\
 import asyncio
 async def consumer():
     stream=asyncio.Queue()
-    async def child_producer():
+    async def child_producer(stream_queue):
         result = await asyncio.gather(slow_tool())
         stream.put_nowait(None)
         return result
-    task = asyncio.create_task(child_producer())
+    task = asyncio.create_task(child_producer(stream))
     while True:
         event = await stream.get()
         if event is None:
@@ -27,13 +27,13 @@ SYNTHETIC_CLEANUP="""\
 import asyncio
 async def consumer():
     stream=asyncio.Queue()
-    async def child_producer():
+    async def child_producer(stream_queue):
         try:
             result = await asyncio.gather(slow_tool())
         finally:
             stream.put_nowait(None)
         return result
-    task = asyncio.create_task(child_producer())
+    task = asyncio.create_task(child_producer(stream))
     while True:
         event = await stream.get()
         if event is None:
@@ -105,10 +105,28 @@ class SourceSentinelCompiler(unittest.TestCase):
 
     def test_no_scheduled_task_is_not_sufficient(self):
         self.file.write_text(SYNTHETIC_CANCEL.replace(
-            "task = asyncio.create_task(child_producer())",
-            "task = child_producer()"))
+            "task = asyncio.create_task(child_producer(stream))",
+            "task = child_producer(stream)"))
         plan=synthesize(self.root,"autogen-tool-cancellation")
         self.assertEqual(plan["runnable_count"],0)
+
+    def test_unrelated_queue_consumer_is_not_a_positive(self):
+        # The producer sends the terminal to a different queue from the
+        # one being awaited. A broad pattern scanner would misclassify.
+        src=SYNTHETIC_CANCEL.replace(
+            "task = asyncio.create_task(child_producer(stream))",
+            "other = asyncio.Queue()\n    task = asyncio.create_task(child_producer(other))")
+        self.file.write_text(src)
+        plan=synthesize(self.root,"autogen-tool-cancellation")
+        self.assertEqual(plan["runnable_count"],0)
+
+    def test_queue_passed_by_keyword_is_linked(self):
+        src=SYNTHETIC_CANCEL.replace(
+            "child_producer(stream)","child_producer(stream_queue=stream)")
+        self.file.write_text(src)
+        plan=synthesize(self.root,"autogen-tool-cancellation")
+        self.assertEqual(plan["runnable_count"],1)
+        self.assertEqual(plan["selected"][0]["queue_flow"]["consumer_queue"],"stream")
 
     def test_source_drift_rejected_after_plan_created(self):
         self.file.write_text(SYNTHETIC_CANCEL)

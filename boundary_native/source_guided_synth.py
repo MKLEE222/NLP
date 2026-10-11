@@ -17,6 +17,7 @@ from pathlib import Path
 SOURCE_PROFILES = {
     "agents-guardrail": ("src/agents/run_internal/run_loop.py", "openai-agents-sdk-guardrail"),
     "langgraph-admission": ("libs/langgraph/langgraph/pregel/_runner.py", "langgraph-push-child"),
+    "agents-approved-persistence": ("src/agents/run_internal/run_loop.py", "openai-approved-tool-persistence"),
 }
 
 
@@ -175,6 +176,71 @@ def _scan_admission(tree, relpath):
             "candidates":sorted(proposals,key=lambda x:(x["is_async"],x["source_line"]))}
 
 
+def _scan_approved_persistence(tree, relpath):
+    """Find a resume-owned session save that occurs after a throwing guardrail.
+
+    This recognizes callable/session relations in the SDK source, not a
+    particular issue number or expected version. It is only a risk witness:
+    the actual approved side effect and durable session must be run natively.
+    """
+    funcs=_functions(tree)
+    found=[]
+    for name,fn in funcs.items():
+        if not _writes_final_output(fn):
+            continue
+        guard_indices=[i for i,stmt in enumerate(fn.body)
+                       if "_run_output_guardrails_for_stream" in _called_names(stmt)]
+        if not guard_indices:
+            continue
+        boundary_index=guard_indices[0]
+        def has_save(stmt):
+            return "save_items" in _called_names(stmt)
+        before=any(has_save(stmt) for stmt in fn.body[:boundary_index])
+        after=any(has_save(stmt) for stmt in fn.body[boundary_index+1:])
+        if not after and not before:
+            continue
+        # Require a call site using the explicitly resumed/session-writing
+        # callback, so an ordinary newly generated final answer is excluded.
+        resumed_calls=[]
+        for caller_name,caller in funcs.items():
+            for sub in ast.walk(caller):
+                if (isinstance(sub,ast.Call) and isinstance(sub.func,ast.Name)
+                    and sub.func.id==name):
+                    for kw in sub.keywords:
+                        if (kw.arg=="save_items" and isinstance(kw.value,ast.Name)
+                            and "resumed" in kw.value.id.casefold()):
+                            resumed_calls.append((caller_name,sub))
+        if not resumed_calls:
+            continue
+        protections=[]
+        for caller,call in resumed_calls:
+            values={kw.arg:kw.value for kw in call.keywords}
+            flag=values.get("persist_before_output_guardrails")
+            flag_true=isinstance(flag,ast.Constant) and flag.value is True
+            protections.append(bool(before and flag_true))
+        conditional_save_before_guardrail=before and all(protections)
+        found.append({
+            "kind":"approved_effect_before_guardrail_rejection",
+            "adapter":"openai-approved-tool-persistence",
+            "source_file":relpath,
+            "function":name,"source_line":fn.lineno+boundary_index,
+            "source_inferred_order":("resumed_save_before_guardrail" if conditional_save_before_guardrail
+                                     else "resumed_guardrail_may_precede_save"),
+            "resumed_call_sites":len(resumed_calls),
+            "injection":{"callback":"output_guardrail",
+                         "variants":["run_pass","streamed_pass","run_trip","streamed_trip"],
+                         "requires_approval":True},
+            "observation":["session_call_count","session_output_count",
+                           "tool_executions","guardrail_status"],
+            "negative_control":"normal_and_streamed_without_tripwire",
+            "contract":"approved_executed_tool_has_paired_persisted_output",
+            "eligible":len(resumed_calls)>0,
+        })
+    return {"search_space":{"top_level_function_count":len(funcs),
+                            "resumed_persistence_functions":len(found)},
+            "candidates":found}
+
+
 def synthesize(root:Path,profile:str,budget:int=1):
     if profile not in SOURCE_PROFILES or budget<1:
         raise ValueError("unsupported profile or nonpositive execution budget")
@@ -185,7 +251,12 @@ def synthesize(root:Path,profile:str,budget:int=1):
         raise ValueError("input source not in pinned repository")
     raw=source.read_bytes()
     tree=ast.parse(raw.decode("utf-8"),filename=rel)
-    scan=_scan_guardrail(tree,rel) if profile=="agents-guardrail" else _scan_admission(tree,rel)
+    if profile=="agents-guardrail":
+        scan=_scan_guardrail(tree,rel)
+    elif profile=="agents-approved-persistence":
+        scan=_scan_approved_persistence(tree,rel)
+    else:
+        scan=_scan_admission(tree,rel)
     chosen=[item for item in scan["candidates"] if item["eligible"]][:budget]
     return {
         "schema_version":1,"profile":profile,"adapter":adapter,

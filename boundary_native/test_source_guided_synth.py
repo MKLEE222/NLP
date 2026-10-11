@@ -166,6 +166,25 @@ async def first_turn():
         p=synthesize(self.root,"agents-approved-persistence")
         self.assertEqual(p["candidate_count"],0)
 
+    def test_plan_contract_cannot_be_rewritten_after_source_selection(self):
+        from copy import deepcopy
+        self.write_source("agents-guardrail",AGENT_TEMPLATE.replace("ENDING","return []"))
+        plan=synthesize(self.root,"agents-guardrail")
+        forged=deepcopy(plan)
+        forged["selected"][0]["contract"]="allow_failed_guardrail_to_commit"
+        with self.assertRaisesRegex(ValueError,"differs from source"):
+            verify_pinned_source(self.root,forged)
+
+    def test_plan_candidate_order_not_mutable(self):
+        from copy import deepcopy
+        self.write_source("langgraph-admission",ADMISSION_TEMPLATE.replace(
+            "pending.items()","futures().items()").replace("LEFT","t"))
+        plan=synthesize(self.root,"langgraph-admission")
+        forged=deepcopy(plan)
+        forged["selected"][0]["source_line"]+=1
+        with self.assertRaisesRegex(ValueError,"differs from source"):
+            verify_pinned_source(self.root,forged)
+
     def test_output_bound_to_exact_source(self):
         path=self.write_source("agents-guardrail",AGENT_TEMPLATE.replace("ENDING","raise"))
         plan=synthesize(self.root,"agents-guardrail")

@@ -243,64 +243,84 @@ def _scan_approved_persistence(tree, relpath):
 
 
 def _scan_terminal_sentinel(tree, relpath):
-    """Locate a dynamically plausible orphaned async stream completion.
+    """Source-to-queue-flow witness for an orphaned async termination sentinel.
 
-    A producer awaits a potentially cancelling gather, then posts an end
-    sentinel only on normal completion, while its enclosing consumer blocks
-    on a queue read. This is a *potential* missing-finally witness.
-    Dynamic test is required before a FAIL label is licensed.
+    Requires the producer's sentinel queue and the consumer's awaited queue
+    to be linked by the *same* task-spawn call. Merely spotting 'gather',
+    'put_nowait(None)', and an unrelated 'get()' is insufficient.
     """
     proposals=[]
     gather_total=0
     sentinel_total=0
+
+    def awaited_read_queues(scope, blocked):
+        answer=set()
+        for sub in ast.walk(scope):
+            if sub in blocked:
+                continue
+            if not isinstance(sub,ast.Await) or not isinstance(sub.value,ast.Call):
+                continue
+            f=sub.value.func
+            if (isinstance(f,ast.Attribute) and f.attr=="get" and
+                isinstance(f.value,ast.Name)):
+                answer.add(f.value.id)
+        return answer
+
+    def spawn_bound_queue(outer, inner, written_name):
+        formals=[arg.arg for arg in inner.args.args]
+        names=set()
+        for sub in ast.walk(outer):
+            if not isinstance(sub,ast.Call):
+                continue
+            if not (isinstance(sub.func,ast.Attribute) and sub.func.attr=="create_task"):
+                continue
+            for call in sub.args:
+                if not (isinstance(call,ast.Call) and
+                        isinstance(call.func,ast.Name) and call.func.id==inner.name):
+                    continue
+                if written_name not in formals:
+                    names.add(written_name)  # closed-over outer binding
+                    continue
+                idx=formals.index(written_name)
+                passed=(call.args[idx] if len(call.args)>idx else
+                        next((kw.value for kw in call.keywords if kw.arg==written_name),None))
+                if isinstance(passed,ast.Name):
+                    names.add(passed.id)
+        return names
+
     for node in ast.walk(tree):
         if not isinstance(node,ast.AsyncFunctionDef):
             continue
-        statements=list(node.body)
-        for idx,stmt in enumerate(statements):
+        for stmt in node.body:
             calls=_called_names(stmt)
-            if "gather" in calls:
-                gather_total+=1
-            if "put_nowait" in calls and any(
-                isinstance(sub,ast.Constant) and sub.value is None for sub in ast.walk(stmt)
-            ):
-                sentinel_total+=1
-        nested=[
-            sub for sub in ast.walk(node)
-            if isinstance(sub,ast.AsyncFunctionDef) and sub is not node
-        ]
+            gather_total+=int("gather" in calls)
+            sentinel_total+=int(
+                "put_nowait" in calls and
+                any(isinstance(sub,ast.Constant) and sub.value is None
+                    for sub in ast.walk(stmt))
+            )
+        nested=[sub for sub in ast.walk(node)
+                if isinstance(sub,ast.AsyncFunctionDef) and sub is not node]
         for inner in nested:
-            statements=list(inner.body)
-            for i,stmt in enumerate(statements):
+            blocked=set(ast.walk(inner))
+            readers=awaited_read_queues(node,blocked)
+            for i,stmt in enumerate(inner.body):
                 if "gather" not in _called_names(stmt):
                     continue
-                for j,after in enumerate(statements[i+1:],start=i+1):
+                for after in inner.body[i+1:]:
                     if not (isinstance(after,ast.Expr) and
                             isinstance(after.value,ast.Call) and
                             isinstance(after.value.func,ast.Attribute) and
                             after.value.func.attr=="put_nowait" and
-                            after.value.args and isinstance(after.value.args[0],ast.Constant)
-                            and after.value.args[0].value is None):
+                            isinstance(after.value.func.value,ast.Name) and
+                            after.value.args and
+                            isinstance(after.value.args[0],ast.Constant) and
+                            after.value.args[0].value is None):
                         continue
-                    # Direct statement prefix means the sentinel does NOT live
-                    # in a finally handler enclosing the potentially aborting await.
-                    has_waiting_consumer=any(
-                        isinstance(sub,ast.Await) and
-                        isinstance(sub.value,ast.Call) and
-                        isinstance(sub.value.func,ast.Attribute) and
-                        sub.value.func.attr=="get"
-                        for sub in ast.walk(node)
-                        if sub not in ast.walk(inner)
-                    )
-                    task_spawn=any(
-                        isinstance(sub,ast.Call) and
-                        isinstance(sub.func,ast.Attribute) and
-                        sub.func.attr=="create_task" and
-                        any(isinstance(arg,ast.Call) and isinstance(arg.func,ast.Name)
-                                and arg.func.id==inner.name for arg in sub.args)
-                        for sub in ast.walk(node)
-                    )
-                    if not has_waiting_consumer or not task_spawn:
+                    written=after.value.func.value.id
+                    bound=spawn_bound_queue(node,inner,written)
+                    matched=sorted(bound & readers)
+                    if not matched:
                         continue
                     proposals.append({
                         "kind":"cancellation_to_missing_stream_terminator",
@@ -310,10 +330,14 @@ def _scan_terminal_sentinel(tree, relpath):
                         "producer":inner.name,
                         "source_line":stmt.lineno,
                         "terminal_line":after.lineno,
+                        "queue_flow":{"producer_queue":written,
+                                      "consumer_queue":matched[0]},
                         "waiting_consumer":True,
                         "sentinel_in_finally":False,
-                        "injection":{"callback":"tool_run", "variants":["normal_complete","cancel_inflight"]},
-                        "observation":["tool_started","stream_terminal","cancel_propagated","bounded_timeout"],
+                        "injection":{"callback":"tool_run",
+                                     "variants":["normal_complete","cancel_inflight"]},
+                        "observation":["tool_started","stream_terminal",
+                                       "cancel_propagated","bounded_timeout"],
                         "negative_control":"identical_tool_completes_without_cancel",
                         "contract":"inflight_cancel_must_not_deadlock_stream_consumer",
                         "eligible":True,
@@ -321,10 +345,11 @@ def _scan_terminal_sentinel(tree, relpath):
     return {
         "search_space":{"nested_async_producers":sum(
             1 for x in ast.walk(tree) if isinstance(x,ast.AsyncFunctionDef)
-            and any(isinstance(sub,ast.AsyncFunctionDef) for sub in ast.walk(x) if sub is not x)),
+            and any(isinstance(sub,ast.AsyncFunctionDef)
+                    for sub in ast.walk(x) if sub is not x)),
             "gather_statements":gather_total,
             "none_sentinel_statements":sentinel_total},
-        "candidates":sorted(proposals,key=lambda x:(x["source_file"],x["source_line"]))
+        "candidates":sorted(proposals,key=lambda x:(x["source_file"],x["source_line"])),
     }
 
 

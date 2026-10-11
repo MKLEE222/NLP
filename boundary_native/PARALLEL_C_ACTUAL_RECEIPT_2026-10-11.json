@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-11",
+  "source": "GitHub Actions public job live logs",
+  "run": 38120908814,
+  "job_id": 114415263987,
+  "job_conclusion": "success",
+  "run_url": "https://github.com/MKLEE222/NLP/actions/runs/38120908814",
+  "scope": "1 previously reported native SDK issue; actual source logs preloaded from 38119414591; no new native run",
+  "independent_evidence_units": 1,
+  "unit_test_count": 11,
+  "log_label": "EPISTEMIC_NATIVE_DEV",
+  "observed": {
+    "issue_units": 1,
+    "results": [
+      {
+        "naive_log_only": "SUGGEST_RETRY",
+        "native_result_count": 0,
+        "phase": "before",
+        "remaining_possible_worlds": 2,
+        "retry_assessment": "UNSAFE_OR_UNAUTHORIZED"
+      },
+      {
+        "naive_log_only": "NO_RETRY",
+        "native_result_count": 1,
+        "phase": "after",
+        "remaining_possible_worlds": 2,
+        "retry_assessment": "UNSAFE_OR_UNAUTHORIZED"
+      }
+    ]
+  },
+  "scientific_claim": "development-only engineering/theory validation, no novelty or unseen discovery"
+}

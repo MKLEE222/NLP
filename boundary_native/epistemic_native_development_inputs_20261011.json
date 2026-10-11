@@ -1,0 +1,57 @@
+{
+  "schema": "known_development_native_approved_tool_receipts_v1",
+  "date": "2026-10-11",
+  "scientific_scope": "one previously reported issue: OpenAI Agents #4125, actual SDK native LOCAL fake tool; not remote commit and not independent unknown bug",
+  "rights": "local-only no hosted LLM API/no remote effects",
+  "cases": [
+    {
+      "phase": "before",
+      "source_commit": "6e2095d918a3875ba367ccbd9cc03ecb70ce2986",
+      "github_action_run": 38119414591,
+      "github_job_id": 114410861256,
+      "original_issue": "https://github.com/openai/openai-agents-python/issues/4125",
+      "exact_native_local_case": {
+        "mode": "streamed",
+        "orphaned": true,
+        "paired": false,
+        "session_call_ids": [
+          "2"
+        ],
+        "session_output_ids": [],
+        "session_types": [
+          "user",
+          "function_call"
+        ],
+        "status": "blocked",
+        "tool_executions": 1,
+        "tripwire": true
+      }
+    },
+    {
+      "phase": "after",
+      "source_commit": "9d894a9032e8d373f8b54d81591db36ce75b315d",
+      "github_action_run": 38119414591,
+      "github_job_id": 114410861327,
+      "original_issue": "https://github.com/openai/openai-agents-python/issues/4125",
+      "exact_native_local_case": {
+        "mode": "streamed",
+        "orphaned": false,
+        "paired": true,
+        "session_call_ids": [
+          "2"
+        ],
+        "session_output_ids": [
+          "2"
+        ],
+        "session_types": [
+          "user",
+          "function_call",
+          "function_call_output"
+        ],
+        "status": "blocked",
+        "tool_executions": 1,
+        "tripwire": true
+      }
+    }
+  ]
+}

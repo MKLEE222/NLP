@@ -109,6 +109,63 @@ class SourceCompilerTests(unittest.TestCase):
         self.assertEqual(plan["selected"][0]["comparison"],
                          "stored_id_vs_candidate_id")
 
+
+    def test_resumed_approval_persistence_before_and_after_guardrail(self):
+        old = """
+async def finalize(save_items):
+    result = await _run_output_guardrails_for_stream()
+    streamed_result.final_output = result
+    await save_items(items)
+
+async def resumed():
+    await finalize(save_items=_save_resumed_items)
+
+async def fresh():
+    await finalize(save_items=_save_fresh_items)
+"""
+        self.write_source("agents-approved-persistence",old)
+        p=synthesize(self.root,"agents-approved-persistence")
+        self.assertEqual(p["candidate_count"],1)
+        self.assertEqual(p["selected"][0]["source_inferred_order"],
+                         "resumed_guardrail_may_precede_save")
+        self.assertEqual(p["selected"][0]["resumed_call_sites"],1)
+        fixed = """
+async def finalize(save_items,persist_before_output_guardrails):
+    if persist_before_output_guardrails:
+        await save_items(items)
+    result = await _run_output_guardrails_for_stream()
+    streamed_result.final_output = result
+    if not persist_before_output_guardrails:
+        await save_items(items)
+
+async def resumed():
+    await finalize(save_items=_save_resumed_items,
+                   persist_before_output_guardrails=True)
+
+async def fresh():
+    await finalize(save_items=_save_fresh_items,
+                   persist_before_output_guardrails=False)
+"""
+        self.write_source("agents-approved-persistence",fixed)
+        q=synthesize(self.root,"agents-approved-persistence")
+        self.assertEqual(q["candidate_count"],1)
+        self.assertEqual(q["selected"][0]["source_inferred_order"],
+                         "resumed_save_before_guardrail")
+        self.assertEqual(q["selected"][0]["injection"]["variants"],
+                         ["run_pass","streamed_pass","run_trip","streamed_trip"])
+
+    def test_no_resumed_context_no_approval_obligation(self):
+        self.write_source("agents-approved-persistence","""
+async def finalize(save_items):
+    result = await _run_output_guardrails_for_stream()
+    streamed_result.final_output = result
+    await save_items(items)
+async def first_turn():
+    await finalize(save_items=_save_fresh_items)
+""")
+        p=synthesize(self.root,"agents-approved-persistence")
+        self.assertEqual(p["candidate_count"],0)
+
     def test_output_bound_to_exact_source(self):
         path=self.write_source("agents-guardrail",AGENT_TEMPLATE.replace("ENDING","raise"))
         plan=synthesize(self.root,"agents-guardrail")

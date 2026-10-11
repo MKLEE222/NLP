@@ -223,7 +223,7 @@ def _scan_approved_persistence(tree, relpath):
             "kind":"approved_effect_before_guardrail_rejection",
             "adapter":"openai-approved-tool-persistence",
             "source_file":relpath,
-            "function":name,"source_line":fn.lineno+boundary_index,
+            "function":name,"source_line":fn.body[boundary_index].lineno,
             "source_inferred_order":("resumed_save_before_guardrail" if conditional_save_before_guardrail
                                      else "resumed_guardrail_may_precede_save"),
             "resumed_call_sites":len(resumed_calls),

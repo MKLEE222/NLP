@@ -8,6 +8,7 @@ Date: 2026-10-11. Research status: executable V0 and a falsifiable *own-method h
 |---|---|---|
 | FRIES (Yin et al., 2024) | ISSTA main, weighted Rust API dependency graph + ownership-valid API-sequence fuzz-target generation; 130 bugs, 84 previously unknown and 54 confirmed | Source dependency-guided test generation and resource legality are already established. |
 | FailMapper (Dong et al., 2025) | ASE main, nine failure scenarios + Monte Carlo tree search for bug-triggering unit tests. Reports 40/50 Defects4J bugs and 36 new bugs. Its public Java port uses JavaParser, LLM expansions and runtime verification. | Fault-scenario search or fault classification alone is not original. |
+| DynaMOSA (Panichella, Kifetew & Tonella, 2018) | IEEE TSE, dynamic many-objective test generation prioritizing targets by control dependencies; 346 Java classes, mutation/branch coverage comparisons | Even dynamic budgeted control-dependency-aware test selection predates our method; current greedy source-window selector is plainly classical. |
 | Valg (Kim et al., 2025) | ASE main, Distinguished Paper; selective runtime monitoring via a two-armed bandit optimizing redundant monitor checks | Budget-aware test/monitor selection is not new in isolation. |
 | MR-Scout (Xu et al., 2024) | TOSEM, automatically mines and codifies metamorphic relations from developer-written tests, then filters weak relations | Automatic extraction of oracles from existing tests has a very strong journal prior. |
 | MR-Coupler (Xu et al., 2026) | FSE main, derives function coupling from source and uses LLM-synthesized tests + amplification/mutation validation | Even source-driven cross-function test relation inference has been done. |
@@ -21,6 +22,7 @@ References (accepted tracks/source documentation):
 - FRIES https://doi.org/10.1145/3650212.3680348
 - FailMapper https://conf.researchr.org/details/ase-2025/ase-2025-papers/212/FailMapper-Automated-Generation-of-Unit-Tests-Guided-by-Failure-Scenarios
 - public FailMapper artifact https://github.com/nuwaLab/FailMapper
+- DynaMOSA (TSE) https://doi.org/10.1109/TSE.2017.2663435
 - Valg https://conf.researchr.org/details/ase-2025/ase-2025-papers/88/Faster-Runtime-Verification-during-Testing-via-Feedback-Guided-Selective-Monitoring
 - MR-Scout https://doi.org/10.1145/3656340
 - MR-Coupler https://conf.researchr.org/details/fse-2026/fse-2026-research-papers/200/MR-Coupler-Automated-Metamorphic-Test-Generation-via-Functional-Coupling-Analysis
@@ -29,7 +31,7 @@ References (accepted tracks/source documentation):
 - Onweer https://doi.org/10.1109/ICSME64153.2025.00031
 - agent bugs https://conf.researchr.org/details/ase-2025/ase-2025-industry-showcase/23/A-Characterization-Study-of-Bugs-in-LLM-Agent-Workflow-Orchestration-Frameworks
 
-TSE publishes principled software-construction, analysis and assessment results including theory and empirical testing. No individual TSE methodology has been misrepresented as one of the conference papers above; we use the standards of TSE/TOSEM for contribution, design and replicability.
+TSE already establishes dynamic control-dependency-based test selection (DynaMOSA). TOSEM establishes transferable oracle synthesis (MR-Scout). Thus the paper cannot be justified simply by renaming target selection, temporal checking, or test oracles; the joint source-identity-bound fault-window compiler must exhibit its own distinct measured capability.
 
 ## 2. Anchor one REAL phenomenon rather than an acronym
 

@@ -42,6 +42,14 @@ The development sample uses 4 *pairs* of disjoint edit histories (16 edits/histo
 
 If any history edit violates the preregistered training contract (sequence too long, numerical error, impossible update), record the exact block and its denominator; do not repair a history or replace it with an easier example. Before eligibility filtering, specify a fixed baseline-wrong criterion if restricting to correction-needed edits, and preserve exclusion counts by source.
 
+## Pre-model source-audit correction: shared locality evaluation instruments
+
+The pinned author's QAEdit source (SHA256 `fab6328110cbb2912eb71945e11b12ef0606fcf5ddbd6a3fafd2fee6b6fdc4cc`) contains 96,245 locality placements but only 51,092 distinct normalized locality questions. Of those distinct locality questions, 21,128 occur in more than one of our six allocated *roles*; 26,111 are repeated across dataset rows. There are **zero exact normalized locality-to-primary/rephrase QA overlaps** and **zero conflicting normalized locality answers**. Subject/prompt/rephrase role leakage remains zero. This is a common-instrument dependence issue, not automatically prohibited leakage.
+
+Before any neural confirmation, lock the following: (a) locality items are NEVER legal preflight features, sentinel prompts, or training labels for the risk policy; (b) any repeated locality item is treated as a shared test instrument, never counted as an independent confirm observation; (c) bootstrap on whole independent history pairs, and additionally report a **sensitivity** using only locality questions exclusive to each phase's outcome role (no substitutions if a record has none; report coverage and missingness); (d) compare target/rephrase consequence divergence separately, without locality, so shared locality items cannot manufacture the only positive result; (e) test source-wise and checkpoint-wise. The prior primary metric stays unchanged; no threshold is tuned to observed neural outcomes.
+
+Audit provenance: [real-source GitHub Actions](https://github.com/MKLEE222/NLP/actions/runs/38110242347). Data profile is metadata only and did not inspect model outputs.
+
 ## Baselines and alternative explanations
 
 At equal observation/call/token budgets: (1) no preflight, (2) prospective question only, (3) 4/8 random legal sentinel questions, (4) direct answer/log-prob prediction (log-prob access is its OWN priced contract), (5) nearest-neighbor predictors fitted only on development trajectories, (6) a simple empirical uncertainty or disagreement score. Instrumented gradient/low-rank/Taylor methods and next-write-and-restore are explicitly **separate higher-privilege ceilings**.

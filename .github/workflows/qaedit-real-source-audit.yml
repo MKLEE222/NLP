@@ -1,0 +1,50 @@
+name: qaedit-real-source-audit
+on:
+  push:
+    branches: [research/operational-consequence-gap-20261011]
+    paths:
+      - 'operational_gap/studies/qaedit_future_collision/**'
+      - '.github/workflows/qaedit-real-source-audit.yml'
+  workflow_dispatch:
+jobs:
+  real-source-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Download immutable authors' published QAEdit
+        run: |
+          mkdir -p /tmp/qaedit_real
+          curl --fail --location --retry 3 --retry-delay 3 --silent --show-error \
+            'https://raw.githubusercontent.com/WanliYoung/Revisit-Editing-Evaluation/61ccca3c1ecdb3976c9c0924e9352f3e64cc7d48/data/QAEdit.json' \
+            --output /tmp/qaedit_real/QAEdit.json
+          sha256sum /tmp/qaedit_real/QAEdit.json
+      - name: Real-source field profile and contract audit
+        run: |
+          python operational_gap/studies/qaedit_future_collision/audit_real_dataset.py \
+            --input /tmp/qaedit_real/QAEdit.json --report /tmp/qaedit_real/audit.json
+      - name: Deterministic preregistered manifest
+        run: |
+          python operational_gap/studies/qaedit_future_collision/prepare_manifest.py \
+            --input /tmp/qaedit_real/QAEdit.json --output /tmp/qaedit_real/manifest.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/qaedit_real/manifest.json'))
+          for phase in ['dev','confirm']:
+              s=d[phase]
+              print(phase,'trajectories=',len(s['trajectories']),'candidate events=',len(s['events']),
+                    'sentinels=',len(s['sentinel_question_ids']))
+          PY
+      - name: Upload metadata and ID-only manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: qaedit-real-source-20261011
+          path: |
+            /tmp/qaedit_real/audit.json
+            /tmp/qaedit_real/manifest.json
+          retention-days: 14

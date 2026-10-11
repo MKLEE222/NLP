@@ -103,3 +103,68 @@ jobs:
             window_native_environment.txt
           if-no-files-found: warn
           retention-days: 14
+
+  native-logical-task-identity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - phase: upstream_bug
+            repo: langchain-ai/langgraph
+            sha: b2926a0ff9589c28c7e01fe7cdbb337b86d5a4b4
+            identity_projection: object
+          - phase: community_fix
+            repo: HUAN2022A/langgraph
+            sha: e0d4ecf9cd5c5bd5a731d72009936aacf8491692
+            identity_projection: id
+    env:
+      PIP_DISABLE_PIP_VERSION_CHECK: '1'
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ matrix.repo }}
+          ref: ${{ matrix.sha }}
+          path: upstream
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install immutable original or unmerged community revision
+        run: |
+          test "$(git -C upstream rev-parse HEAD)" = "${{ matrix.sha }}"
+          python -m pip install --no-cache-dir -e ./upstream/libs/langgraph
+          python -m pip freeze > native_langgraph_${{ matrix.phase }}_environment.txt
+      - name: Compile both sync and async task identity obligations
+        run: |
+          mkdir -p window_receipts
+          python boundary_native/obligation_window_kernel.py --source upstream/libs/langgraph/langgraph/pregel/_runner.py --budget 2 --output window_receipts/task_identity_source.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data=json.loads(Path('window_receipts/task_identity_source.json').read_text())
+          got=data['selected']
+          assert len(got)==2, (len(got),data['candidate_count'])
+          assert {x['source_obligation'] for x in got}=={'inflight_logical_task_not_reissued'}
+          assert {x['existing_projection'] for x in got}=={"${{ matrix.identity_projection }}"}
+          assert {x['caller'] for x in got}=={'_call','_acall_impl'}
+          print('LOGICAL_ID_WINDOWS',len(got),[x['guard_at_line'] for x in got])
+          PY
+      - name: Native real task-admission witness and identity control
+        run: |
+          timeout --signal=TERM --kill-after=8s 85s python boundary_native/issue8393_langgraph_child_admission.py --upstream-root upstream --source-commit ${{ matrix.sha }} --expected-phase ${{ matrix.phase }} --output window_receipts/task_identity_native.json
+      - name: Preserve both source and runtime records
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: obligation-window-langgraph-${{ matrix.phase }}
+          path: |
+            window_receipts/
+            native_langgraph_${{ matrix.phase }}_environment.txt
+          if-no-files-found: warn
+          retention-days: 14

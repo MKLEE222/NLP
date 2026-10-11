@@ -1,0 +1,142 @@
+{
+  "schema": "UNSEEN_RUNTIME_ISSUE_HOLDOUT_V1",
+  "cutoff": "2026-10-10",
+  "frozen_at_date": "2026-10-11",
+  "selection": "Title-only triage from GitHub repository-scoped issue-search results. Excludes feature suggestions, duplicate queries, pre-inspected CrewAI #7252, LangGraph #6792, OpenAI SDK #4775 and old 3 training issues. IDs and titles seen; NO issue bodies, fix diffs or native outputs viewed before split.",
+  "selection_query_family": [
+    "repo:pydantic/pydantic-ai is:issue \"retry\" \"tool\" created:2025-01-01..2026-10-10",
+    "repo:pydantic/pydantic-ai is:issue \"stream\" \"exception\" created:2025-01-01..2026-10-10",
+    "repo:google/adk-python is:issue \"retry\" \"tool\" created:2025-01-01..2026-10-10",
+    "repo:google/adk-python is:issue \"resume\" \"duplicate\" created:2025-01-01..2026-10-10",
+    "repo:agno-agi/agno is:issue \"retry\" \"duplicate\" created:2025-01-01..2026-10-10",
+    "repo:microsoft/autogen is:issue \"cancel\" \"tool\" created:2025-01-01..2026-10-10"
+  ],
+  "ranking": {
+    "algorithm": "FNV-1a-32 of seed|repo#number, ascending within each repo",
+    "seed": "SRCG-20261011-HOLDOUT-V1",
+    "development": "one lowest-hash candidate per repository",
+    "confirmation": "all other candidates sealed",
+    "unit": "upstream issue not generated test or source function"
+  },
+  "permission": "Read development issue bodies and source only after registry committed; do NOT read sealed confirmation issue bodies, comments, patch diffs or native outcomes. Confirmation issues may have title-level leakage already documented. Status/eligibility must be reported with original denominator. Do not change split after seeing development outputs.",
+  "constraints": {
+    "no_network_side_effects": true,
+    "no_hosted_model_api": true,
+    "allowed_implementation": "native deterministic test scripts and source AST analysis",
+    "unknown_status": "UNKNOWN, never assumed PASS or FAIL"
+  },
+  "cases": [
+    {
+      "repo": "agno-agi/agno",
+      "number": 9448,
+      "title_snapshot": "two concurrent approval continuations both execute tool",
+      "selection_score": 1017822715,
+      "role": "sealed_confirmation"
+    },
+    {
+      "repo": "agno-agi/agno",
+      "number": 9955,
+      "title_snapshot": "HITL rejection streamed loop resumes from iteration zero",
+      "selection_score": 41200726,
+      "role": "development"
+    },
+    {
+      "repo": "agno-agi/agno",
+      "number": 10086,
+      "title_snapshot": "background streamed pause resume duplicates unpaired tool calls",
+      "selection_score": 2219920551,
+      "role": "sealed_confirmation"
+    },
+    {
+      "repo": "agno-agi/agno",
+      "number": 10366,
+      "title_snapshot": "Agent retry reruns successful tool calls",
+      "selection_score": 3147342516,
+      "role": "sealed_confirmation"
+    },
+    {
+      "repo": "google/adk-python",
+      "number": 7245,
+      "title_snapshot": "wrapped agent HITL pause lost and caller continues",
+      "selection_score": 351392810,
+      "role": "sealed_confirmation"
+    },
+    {
+      "repo": "google/adk-python",
+      "number": 7322,
+      "title_snapshot": "Pub/Sub redelivery reruns tool side effects in fresh session",
+      "selection_score": 2707356798,
+      "role": "sealed_confirmation"
+    },
+    {
+      "repo": "google/adk-python",
+      "number": 7428,
+      "title_snapshot": "parallel tool siblings lost on one sibling failure",
+      "selection_score": 4231988329,
+      "role": "sealed_confirmation"
+    },
+    {
+      "repo": "google/adk-python",
+      "number": 7434,
+      "title_snapshot": "repeated tool approval executes confirmed tool again",
+      "selection_score": 37539652,
+      "role": "development"
+    },
+    {
+      "repo": "google/adk-python",
+      "number": 7458,
+      "title_snapshot": "committed transfer lost when next agent fails before yielding",
+      "selection_score": 4199271734,
+      "role": "sealed_confirmation"
+    },
+    {
+      "repo": "microsoft/autogen",
+      "number": 7956,
+      "title_snapshot": "cancellation during tool call deadlocks on_messages_stream",
+      "selection_score": 1194232714,
+      "role": "development"
+    },
+    {
+      "repo": "microsoft/autogen",
+      "number": 7968,
+      "title_snapshot": "model cache omits tool_choice from cache key",
+      "selection_score": 3140877803,
+      "role": "sealed_confirmation"
+    },
+    {
+      "repo": "microsoft/autogen",
+      "number": 8265,
+      "title_snapshot": "MCP workbench cancel passes raw coroutine to link_future",
+      "selection_score": 4066206122,
+      "role": "sealed_confirmation"
+    },
+    {
+      "repo": "pydantic/pydantic-ai",
+      "number": 9734,
+      "title_snapshot": "streaming-step cleanup pending after graph context exit",
+      "selection_score": 2850233584,
+      "role": "development"
+    },
+    {
+      "repo": "pydantic/pydantic-ai",
+      "number": 9964,
+      "title_snapshot": "ToolOutputLimits spill writes outside durable operation repeated on replay",
+      "selection_score": 3110208291,
+      "role": "sealed_confirmation"
+    },
+    {
+      "repo": "pydantic/pydantic-ai",
+      "number": 9991,
+      "title_snapshot": "run_stream_events and UI adapters omit rejected-and-retried streamed responses",
+      "selection_score": 3294909195,
+      "role": "sealed_confirmation"
+    },
+    {
+      "repo": "pydantic/pydantic-ai",
+      "number": 9996,
+      "title_snapshot": "stream parser drops tool arguments in function_call_arguments.done",
+      "selection_score": 3378797290,
+      "role": "sealed_confirmation"
+    }
+  ]
+}

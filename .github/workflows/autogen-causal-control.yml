@@ -1,0 +1,65 @@
+name: autogen-cancel-termination-causal-control
+on:
+  push:
+    branches: [research/unseen-runtime-holdout-20261011]
+    paths:
+      - 'boundary_native/autogen_sentinel_causal_control.py'
+      - '.github/workflows/autogen-causal-control.yml'
+  workflow_dispatch:
+jobs:
+  guarded-test-only-control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    env:
+      PYTHONUNBUFFERED: '1'
+      PIP_DISABLE_PIP_VERSION_CHECK: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: microsoft/autogen
+          ref: 027ecf0a379bcc1d09956d46d12d44a3ad9cee14
+          path: upstream
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Exact upstream source and offline model dependencies
+        run: |
+          test "$(git -C upstream rev-parse HEAD)" = '027ecf0a379bcc1d09956d46d12d44a3ad9cee14'
+          python -m pip install --no-cache-dir -e ./upstream/python/packages/autogen-core
+          python -m pip install --no-cache-dir --no-deps -e ./upstream/python/packages/autogen-agentchat
+          python -m pip install --no-cache-dir --no-deps -e ./upstream/python/packages/autogen-ext
+          python -m pip freeze > /tmp/autogen_causal_env.txt
+      - name: Apply source-hash-guarded test-only sentinel intervention
+        run: |
+          mkdir -p dev_receipts
+          python boundary_native/autogen_sentinel_causal_control.py \
+            --upstream-root upstream \
+            --output dev_receipts/causal_source_patch.json
+      - name: Rerun identical normal and cancellation native fixture
+        run: |
+          timeout --signal=TERM --kill-after=8s 45s python - <<'PY'
+          import asyncio, json, sys
+          from pathlib import Path
+          sys.path.insert(0, 'boundary_native')
+          from execute_autogen_cancel_plan import native_test
+          observed=asyncio.run(native_test(1.5))
+          print('PATCHED_NATIVE_CONTROL', json.dumps(observed,sort_keys=True))
+          Path('dev_receipts/causal_native.json').write_text(
+              json.dumps(observed,indent=2,sort_keys=True)+'\n')
+          if observed['status']!='PASS':
+              raise SystemExit('test-only causal intervention did not fix bounded stream termination')
+          PY
+      - name: Preserve both successful and failed source test receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: autogen-test-only-causal-sentinel
+          path: |
+            dev_receipts/
+            /tmp/autogen_causal_env.txt
+          if-no-files-found: warn
+          retention-days: 14

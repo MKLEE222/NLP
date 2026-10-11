@@ -1,0 +1,74 @@
+name: preregistered-autogen-dev-cancel
+on:
+  push:
+    branches: [research/unseen-runtime-holdout-20261011]
+    paths:
+      - 'boundary_native/source_guided_synth.py'
+      - 'boundary_native/execute_autogen_cancel_plan.py'
+      - 'boundary_native/unseen_issue_registry_v1.json'
+      - 'boundary_native/test_unseen_development.py'
+      - '.github/workflows/autogen-development-cancel.yml'
+  workflow_dispatch:
+jobs:
+  registration-and-compiler:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Test sealed sample split and AST scenario selection
+        run: |
+          python -m compileall -q boundary_native
+          python -m unittest discover -s boundary_native -p 'test_*.py' -v
+  autogen-native-development-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    permissions:
+      contents: read
+    env:
+      PYTHONUNBUFFERED: '1'
+      PIP_DISABLE_PIP_VERSION_CHECK: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: microsoft/autogen
+          ref: 027ecf0a379bcc1d09956d46d12d44a3ad9cee14
+          path: upstream
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Audit actual upstream ref
+        run: |
+          test "$(git -C upstream rev-parse HEAD)" = '027ecf0a379bcc1d09956d46d12d44a3ad9cee14'
+          python -m pip install --no-cache-dir -e ./upstream/python/packages/autogen-core
+          python -m pip install --no-cache-dir --no-deps -e ./upstream/python/packages/autogen-agentchat
+          python -m pip install --no-cache-dir --no-deps -e ./upstream/python/packages/autogen-ext
+          python -m pip freeze > /tmp/heldout_autogen_env.txt
+      - name: Compile source-only failure candidates
+        run: |
+          mkdir -p dev_receipts
+          python boundary_native/source_guided_synth.py \
+            --upstream-root upstream --profile autogen-tool-cancellation \
+            --budget 1 --output dev_receipts/source_plan.json
+      - name: Execute normal and cancelled native stream with a hard process timeout
+        run: |
+          timeout --signal=TERM --kill-after=8s 85s \
+            python boundary_native/execute_autogen_cancel_plan.py \
+            --upstream-root upstream \
+            --plan dev_receipts/source_plan.json \
+            --timeout 1.5 \
+            --output dev_receipts/native_observation.json
+      - name: Preserve both successful and failed/unknown attempt logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: preregistered-development-autogen-7956
+          path: |
+            dev_receipts/
+            /tmp/heldout_autogen_env.txt
+          if-no-files-found: warn
+          retention-days: 14

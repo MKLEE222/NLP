@@ -34,6 +34,8 @@ def guarded_patch(root:Path):
     case=original_plan["selected"][0]
     if case["producer"]!="_execute_tool_calls":
         raise ValueError("wrong source producer")
+    if case.get("queue_flow")!={"producer_queue":"stream_queue","consumer_queue":"stream"}:
+        raise ValueError("producer-to-consumer queue was not source-verified")
     tree=ast.parse(orig.decode("utf-8"),filename=PINNED_RELATIVE)
     producers=[x for x in ast.walk(tree)
                if isinstance(x,ast.AsyncFunctionDef) and x.name=="_execute_tool_calls"]

@@ -110,7 +110,7 @@ This is a *mechanism hypothesis with a limited implementation*. The shared compi
 
 - **obligation_window_kernel.py**: scans arbitrary Python source, independent of upstream repo path/issue ID, for nested async producer, actual create_task formal→actual argument identity, awaiting consumer queue, abortable producer await and a normal-only None terminal notification. Emits plan and source SHA. No static BUG label.
 - **native_window_executor.py**: regenerates candidate from source, checks plan was not forged, and permits one trusted local AutoGen adapter to execute its proposed normal/cancel pair.
-- **test_obligation_window_kernel.py**: a tiny adversarial synthetic corpus and unit checks for finally, mismatched queues, no consumer/task, keyword args, alternate producer/await name and source tampering. Deliberately includes unreachable-code case which AST V0 may flag: do NOT claim sound reachability.
+- **test_obligation_window_kernel.py**: a tiny adversarial synthetic corpus and unit checks for finally, mismatched queues, no consumer/task, keyword args, alternate producer/await name and source tampering. First-cut version admitted an await after an unconditional return; it was repaired by simple block-local control-transfer pruning, and queue alias rebinding after task spawn is now excluded. This is *not* full interprocedural reachability.
 - CI: https://github.com/MKLEE222/NLP/actions/runs/38117548112 : 36 tests, native real pinned AutoGen source selected 1 window at await line 1200 and discharge line 1214, normal local replay passed; cancellation timed out at 1.5s. Separately created local causal patch discharging in finally produced 0 candidates. This is **one known upstream development issue**, not an unseen discovery.
 
 The comparison against a token-cooccurrence source scanner in unit tests is intentionally **weak sanity checking**. It does not establish lift over FailMapper, mature stateful/property testing, fault injectors, concurrency schedule tools or modern oracle inference.
@@ -133,3 +133,19 @@ Fair baselines:
 FROZEN DATA: sixteen title-triaged public issues in four frameworks; four dev issues read; TWELVE content-sealed confirmation issues **not read or used**. No confirmation opened until method, eligible-source denominator, native adapter policy, comparator budgets, source hashes, and STOP/UNKNOWN conditions are fixed.
 
 GO: an original reusable component with substantial measured gain (coverage, validity, low false alarms, authority/cost) on untouched real tasks; or an independent, useful empirical benchmark with new findings. NO-GO for the method only if effects reduce to manually hardcoded known repro scripts and no distinct capability remains. Select venue **after** empirical contribution exists.
+
+
+## 8. Second cold-start static precision pass (same day)
+
+The initial generic obligation-window compiler would still report a syntactically present await after a direct unconditional return/raise, and could join the producer's original queue to an outer consumer that had *rebound its queue name* after task spawn. These were scientific validity defects, not new bugs in third-party SDKs.
+
+We repaired the compiler to (a) stop a block-local candidate path at direct return/raise/break/continue transfers; (b) reject producer→consumer name matches when the outer queue variable is reassigned between the source task spawn and the awaited read. Existing lexical finally, missing consumer and mismatched queue controls remain.
+
+The adversarial micro-source corpus now includes these traps. The retained tiny corpus has **15 source snippets with manually declared structural eligibility**: 5 eligible and 10 ineligible. The token-presence baseline intentionally does not check reachability/alias and is only a *sanity* comparator, not FRIES, FailMapper or a realistic property-based test method. These are **source-test-plan eligibility labels**, not 15 real runtime bugs or automatic held-out detections.
+
+This narrow repair does not solve branching reachability, exception suppression, awaitable completion outside queue identities, false signals, or real remote effect observability. Such unsupported patterns must remain UNKNOWN/NO-CANDIDATE rather than being promoted to a correctness theorem.
+
+Latest CI with both native execution and all regression tests:
+https://github.com/MKLEE222/NLP/actions/runs/38117748435
+
+Frozen 12 issue-confirmation records remain unopened. A possible next method improvement is typed activation/discharge across approval use and durable effect receipts, *but only if the same generic analyzer compiles them without a special bug-ID branch, with matched negative controls*.

@@ -1,0 +1,10 @@
+{
+  "baseline_reproduced": true,
+  "all_margin_reconstructions_checked": true,
+  "method_hash_valid": true,
+  "protocol_hash_valid": true,
+  "model_hash_valid": true,
+  "reload_probability_parity": true,
+  "sample_ids_match": true,
+  "sample_schema_valid": true
+}

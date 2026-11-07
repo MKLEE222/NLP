@@ -1,0 +1,38 @@
+{
+  "notebook_ref": "saddamaditya/name-that-llm-two-stage-lora-hungarian",
+  "version": 1,
+  "last_run": "2026-11-04T10:09:22.983063Z",
+  "notebook_source_sha256": "acdd6e71929750dbc81747a1aa672e8db217f0b0d2e921a25a577a6ce5eab960",
+  "sources": {
+    "datasetDataSources": [
+      "seyitkaangunes/ntl-extra-api-passages",
+      "abdullah1afify/ntl-generations",
+      "dophuchung/ntl-proxy-generations",
+      "zbigniewkirchner/ntl-qwen3-8b-lora-claude-head",
+      "lucasboesen/ntl-free-proxy-generations",
+      "nishantdahal/ntl-two-stage-lora",
+      "swaroopmeher/ntl-public-heads",
+      "prvsiyan/prvsiyans-extended-name-that-llm-dataset",
+      "bbucxi/qwen35-9b-safetensors",
+      "pjmathematician/ultrabert-380m-ntl"
+    ],
+    "kernelDataSources": [
+      "lucasboesen/name-that-llm-glm4-9b-trunc25",
+      "lucasboesen/name-that-llm-extract-encoders2",
+      "lucasboesen/name-that-llm-electra-large-weights",
+      "lucasboesen/name-that-llm-desklib-weights",
+      "lucasboesen/name-that-llm-train-lora24-s7",
+      "lucasboesen/name-that-llm-train-tokattn",
+      "lucasboesen/name-that-llm-train-tokattn2",
+      "vnton37nguyn/ntl-train-lora-qwen25-instyle"
+    ],
+    "modelDataSources": [
+      "qwen-lm/qwen-3/Transformers/8b-base/1",
+      "qwen-lm/qwen-3/Transformers/4b-base/1",
+      "qwen-lm/qwen-3/Transformers/14b-base/1",
+      "qwen-lm/qwen2.5/Transformers/7b/1"
+    ]
+  },
+  "full_reproduction_status": "BLOCKED: multiple LoRA/backbone dependencies absent; local experiment reproduces components only",
+  "stronger_notebook_api_status": 404
+}

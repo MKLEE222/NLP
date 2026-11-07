@@ -1,0 +1,50 @@
+{
+  "scope": "post-hoc fixed matched-feature linear control; no C tuning",
+  "BA": {
+    "COMPACT_LR": 0.44452895848869,
+    "BASE": 0.5564156102411135,
+    "TREE": 0.43527218493661446,
+    "XGB_FULL": 0.574553815560527
+  },
+  "folds": [
+    {
+      "fold": 1,
+      "compact_LR_BA": 0.41111111111111115,
+      "feature_dimensions": 217,
+      "tree_prediction_reconstructed": true
+    },
+    {
+      "fold": 2,
+      "compact_LR_BA": 0.44999999999999996,
+      "feature_dimensions": 217,
+      "tree_prediction_reconstructed": true
+    },
+    {
+      "fold": 3,
+      "compact_LR_BA": 0.47260536398467434,
+      "feature_dimensions": 217,
+      "tree_prediction_reconstructed": true
+    },
+    {
+      "fold": 4,
+      "compact_LR_BA": 0.437037037037037,
+      "feature_dimensions": 217,
+      "tree_prediction_reconstructed": true
+    },
+    {
+      "fold": 5,
+      "compact_LR_BA": 0.45185185185185184,
+      "feature_dimensions": 217,
+      "tree_prediction_reconstructed": true
+    }
+  ],
+  "LR_minus_TREE_95pct": [
+    -0.009677586833408676,
+    0.028934352720067
+  ],
+  "XGB_residual_minus_LR_95pct": [
+    0.10928144419587378,
+    0.14963062391250315
+  ],
+  "seconds": 6.62
+}

@@ -1,0 +1,5 @@
+{
+  "wrong_tokenizer_rejected": true,
+  "wrong_encoder_stamp_rejected": true,
+  "checked_predictions_match_previous": true
+}

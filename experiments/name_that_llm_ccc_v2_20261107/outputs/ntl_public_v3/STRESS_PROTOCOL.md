@@ -1,0 +1,5 @@
+# Incomplete evaluation-batch diagnostic
+
+Declared before pooled iteration3 results. Concrete risk: official hidden test has unequal model counts; centring gains on complete18-row prompts may not transfer.
+
+Use only outer fold1, unchanged fitting on its other120 prompts. Refit the fixed P1/P2 and Q0/Q1 definitions once and score two predetermined unlabelled batch simulations. With rng20261202 keep rows independently at probability0.5. With rng20261203 retain sorted labels0–8 at probability0.25 and labels9–17 at0.75. The second simulation uses labels only to construct an evaluation distribution shift; no label enters grouping, features, fitting or prediction for those evaluation rows. Infer groups separately from each retained text batch, with the same public threshold0.90 and eligible size2–18. Compare plain and centred predictions on exactly the same retained rows, along with the saved V2 OOF subset. No new thresholds, weights, model settings or candidate selection. Report this as a single-fold stress diagnostic, not an independent confirmation or full-test reconstruction.

@@ -1,0 +1,11 @@
+# Award-readiness audit, 2026-11-07
+
+Review existing fixed models and claims; no training, tuning, candidate selection or leaderboard submission. Reuse five saved iteration4 outer-fold bundles. No frozen experiment artifacts are changed.
+
+Audit ordinary raw Qwen fallback, grouped BASE, default practical XGB_FULL, LGB_FULL and registered WORKSPACE on: original full held-out batch; random-half; random20%; first9 labels retained25% versus last9 retained75%; first5 labels retained10% versus rest90%; inverse provider retention; one random row per true prompt; original validation rows processed in fixed chunks32 and8; original rows under exact singleton-inference semantics. Row selection uses labels/prompt IDs only to define audit distributions, never to generate predictions. Seeds20261300+fold and fixed scenario offsets. Full/chunk/singleton comparisons keep the same rows. Report per-fold and pooled18-label BA, class support, grouping coverage and disagreement with original full-batch predictions. Sparse scenarios are diagnostic and can have small class counts.
+
+Bootstrap1000 prompt groups, seed20261399, for retained-row default-XGB versus grouped BASE contrasts. Report these as fixed-prediction internal stress diagnostics. They do not reproduce the unknown hidden-test distribution.
+
+Also inspect: repeated dataset use, chosen-versus-registered endpoint, fixed-prediction bootstrap scope, training/CV/deployment information, feature-cache identity, inference paths, strong-public-baseline completeness and runnable Kaggle submission readiness. Explicitly distinguish observed coding/wording errors, supported results and untested requirements.
+
+Matched-feature control supplement, declared before its results: reconstruct the saved pure tree's217-dimensional input using the exact three-way training-context partitions, fit a StandardScaler+balanced LR C1,max_iter2000,random42 on each outer training fold, and score the original outer fold. No C search. Verify that reconstructed evaluation features reproduce saved pure-tree predictions. This exploratory control checks whether classifier effects were confounded with compression/input changes; it does not create an independent confirmation dataset.

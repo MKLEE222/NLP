@@ -1,0 +1,10 @@
+{
+  "method": "V2",
+  "trained_rows": 2699,
+  "artifact": "V2_fulltrain.joblib",
+  "bytes": 21602301,
+  "artifact_sha256": "2b31c97248721b83e440db2f91bb26d88cc9a688f23177f7f16a81cffa769207",
+  "reload_predictions_equal": true,
+  "sample_output_rows": 3,
+  "scope": "full-data fitted artifact; sample test only, no hidden-test score or Kaggle submission"
+}

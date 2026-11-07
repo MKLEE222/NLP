@@ -1,0 +1,106 @@
+{
+  "error_counts": {
+    "fixed_by_xgb": 167,
+    "broken_by_xgb": 118,
+    "both_wrong": 1030,
+    "total_xgb_errors": 1148,
+    "within_provider_errors": 629
+  },
+  "class_recall": {
+    "claude-fable-5": 0.2953020134228188,
+    "claude-opus-4-6": 0.7533333333333333,
+    "claude-opus-4-8": 0.62,
+    "claude-opus-5": 0.86,
+    "claude-sonnet-5": 0.58,
+    "gemini-3.1-pro-preview": 0.82,
+    "gemini-3.6-flash": 0.5933333333333334,
+    "gemini-3.7-flash": 0.43333333333333335,
+    "gemini-3.8-flash": 0.5666666666666667,
+    "glm-5.3": 0.34,
+    "glm-5.3-flash": 0.36666666666666664,
+    "gpt-5.5": 0.5466666666666666,
+    "gpt-5.6-luna": 0.5333333333333333,
+    "gpt-5.6-sol": 0.41333333333333333,
+    "gpt-5.6-terra": 0.5666666666666667,
+    "gpt-6-astra": 0.86,
+    "kimi-k3": 0.56,
+    "qwen3.8-max": 0.6333333333333333
+  },
+  "top_confusions": [
+    {
+      "true": "gemini-3.7-flash",
+      "pred": "gemini-3.8-flash",
+      "n": 41
+    },
+    {
+      "true": "gemini-3.8-flash",
+      "pred": "gemini-3.7-flash",
+      "n": 35
+    },
+    {
+      "true": "claude-fable-5",
+      "pred": "glm-5.3-flash",
+      "n": 29
+    },
+    {
+      "true": "glm-5.3",
+      "pred": "glm-5.3-flash",
+      "n": 28
+    },
+    {
+      "true": "gpt-5.6-sol",
+      "pred": "gpt-5.6-luna",
+      "n": 28
+    },
+    {
+      "true": "glm-5.3-flash",
+      "pred": "glm-5.3",
+      "n": 25
+    },
+    {
+      "true": "claude-fable-5",
+      "pred": "glm-5.3",
+      "n": 25
+    },
+    {
+      "true": "gemini-3.7-flash",
+      "pred": "gemini-3.6-flash",
+      "n": 25
+    },
+    {
+      "true": "gpt-5.6-sol",
+      "pred": "gpt-5.6-terra",
+      "n": 25
+    },
+    {
+      "true": "glm-5.3-flash",
+      "pred": "claude-fable-5",
+      "n": 24
+    },
+    {
+      "true": "gpt-5.6-luna",
+      "pred": "gpt-5.6-sol",
+      "n": 24
+    },
+    {
+      "true": "gpt-5.6-terra",
+      "pred": "gpt-5.6-sol",
+      "n": 22
+    },
+    {
+      "true": "gemini-3.6-flash",
+      "pred": "gemini-3.7-flash",
+      "n": 21
+    },
+    {
+      "true": "claude-opus-4-8",
+      "pred": "claude-sonnet-5",
+      "n": 20
+    },
+    {
+      "true": "gpt-5.5",
+      "pred": "kimi-k3",
+      "n": 20
+    }
+  ]
+}

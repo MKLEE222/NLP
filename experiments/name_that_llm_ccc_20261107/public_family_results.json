@@ -1,0 +1,11 @@
+{
+  "name": "B0_PUBLIC_FAMILY",
+  "scope": "exploratory comparator after first lockbox opening; no tuning",
+  "definition": "concatenated char1-5 + word1-2 TFIDF + 15 style features; balanced LR C=2",
+  "not_exact_contestant_reproduction": true,
+  "balanced_accuracy": {
+    "dev": 0.32500000000000007,
+    "lockbox": 0.3645370370370371
+  },
+  "seconds": 11.58
+}

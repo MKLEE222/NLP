@@ -1,0 +1,9 @@
+{
+  "artifact": "Qwen_plain_centred_heads.joblib",
+  "bytes": 2301282,
+  "sha256": "cd9f569417189c62c3bf56827c28dbece8f68caf7cdabfdd4744ef16b780d1c3",
+  "reload_parity": true,
+  "trained_rows": 2699,
+  "requires_local_backbone": "Qwen2.5-7B-Instruct, NF4,20 layers",
+  "scope": "plain and centred full-data fitted heads; not a standalone full ensemble"
+}

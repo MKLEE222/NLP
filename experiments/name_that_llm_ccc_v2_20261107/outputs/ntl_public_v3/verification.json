@@ -1,0 +1,9 @@
+{
+  "script_hash_matches": true,
+  "protocol_hash_matches": true,
+  "sample_ids_match": true,
+  "sample_columns_valid": true,
+  "sample_labels_valid": true,
+  "sample_ids_unique": true,
+  "head_artifact_hash_matches": true
+}

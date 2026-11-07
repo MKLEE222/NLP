@@ -1,0 +1,75 @@
+{
+  "scope": "predeclared single-fold incomplete-batch diagnostic",
+  "fold": 1,
+  "scenarios": [
+    {
+      "scenario": "random_half",
+      "rows": 291,
+      "BA": {
+        "P1": 0.38344596746944526,
+        "P2": 0.4217460104586007,
+        "Q0": 0.4366077046353104,
+        "Q1": 0.5058053912414078,
+        "E": 0.44285770463531043,
+        "V2": 0.3608762921327421
+      },
+      "group_ARI": 0.9553712124960777,
+      "centred_coverage": 0.9656357388316151,
+      "class_counts": {
+        "claude-fable-5": 24,
+        "claude-opus-4-6": 16,
+        "claude-opus-4-8": 17,
+        "claude-opus-5": 18,
+        "claude-sonnet-5": 17,
+        "gemini-3.1-pro-preview": 11,
+        "gemini-3.6-flash": 17,
+        "gemini-3.7-flash": 14,
+        "gemini-3.8-flash": 17,
+        "glm-5.3": 17,
+        "glm-5.3-flash": 13,
+        "gpt-5.5": 13,
+        "gpt-5.6-luna": 20,
+        "gpt-5.6-sol": 17,
+        "gpt-5.6-terra": 13,
+        "gpt-6-astra": 15,
+        "kimi-k3": 13,
+        "qwen3.8-max": 19
+      }
+    },
+    {
+      "scenario": "class_biased",
+      "rows": 261,
+      "BA": {
+        "P1": 0.44727693923727485,
+        "P2": 0.47176605050174847,
+        "Q0": 0.49971803594038533,
+        "Q1": 0.5679862030643876,
+        "E": 0.5045335469401068,
+        "V2": 0.41055410539964315
+      },
+      "group_ARI": 0.9277341873572407,
+      "centred_coverage": 0.9501915708812261,
+      "class_counts": {
+        "claude-fable-5": 3,
+        "claude-opus-4-6": 6,
+        "claude-opus-4-8": 12,
+        "claude-opus-5": 9,
+        "claude-sonnet-5": 7,
+        "gemini-3.1-pro-preview": 6,
+        "gemini-3.6-flash": 6,
+        "gemini-3.7-flash": 4,
+        "gemini-3.8-flash": 8,
+        "glm-5.3": 21,
+        "glm-5.3-flash": 23,
+        "gpt-5.5": 22,
+        "gpt-5.6-luna": 24,
+        "gpt-5.6-sol": 20,
+        "gpt-5.6-terra": 19,
+        "gpt-6-astra": 21,
+        "kimi-k3": 25,
+        "qwen3.8-max": 25
+      }
+    }
+  ],
+  "seconds": 69.41
+}

@@ -1,0 +1,16 @@
+{
+  "artifact": "workspace_residual_model.joblib",
+  "bytes": 7192593,
+  "sha256": "1994ecfbe6227036eb6fc1e30ccf742e1c7526f8a376ff3a62018d750a2eb2bf",
+  "rounds": {
+    "plain": 400,
+    "xgb": 197,
+    "lgb": 139
+  },
+  "trained_rows": 2699,
+  "reload_probability_parity": true,
+  "parity_rows": 89,
+  "parity_corrected_rows": 87,
+  "requires_backbone": "same pinned Qwen2.5-7B-Instruct/NF420-layer encoder",
+  "scope": "full-data candidate artifact; outcome justification remains in the frozen CV report"
+}

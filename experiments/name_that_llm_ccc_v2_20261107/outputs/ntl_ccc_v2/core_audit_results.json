@@ -1,0 +1,27 @@
+{
+  "status": "COMPLETE",
+  "claim": "finite OOF ordinary-accuracy contrast V1 minus B0",
+  "core_sha256": "3b2a81f803de2aaa3eb522327128b68016bb6c08522a34a2c174010dc240b0c3",
+  "core_function": "aggregate_claim_compiler.fast_rate_interval",
+  "core_unchanged": true,
+  "disagreement_rows": 1204,
+  "actionable_prompts": 150,
+  "complete_accuracy_delta": -0.0007410151908114337,
+  "directed": {
+    "prompts": 150,
+    "rows_revealed": 2699,
+    "sign": -1,
+    "bound": [
+      -0.0016597510373443983,
+      -0.0016597510373443983
+    ]
+  },
+  "random_100_mean_prompts": 150.0,
+  "random_100_prompt_range": [
+    150,
+    150
+  ],
+  "random_100_mean_rows": 2699.0,
+  "all_publications_match_complete_audit": true,
+  "scope": "fixed finite cohort; no generalization or classifier improvement certificate"
+}

@@ -1,0 +1,9 @@
+{
+  "scope": "post-evaluation reporting; same frozen OOF predictions; no training or tuning",
+  "bonferroni_one_sided_98_333pct_delta_lower": {
+    "V1": -0.018887314607672536,
+    "V2": 0.001499142878896789,
+    "V3": -0.017405833126191067,
+    "SELECTED": -0.005555555555555574
+  }
+}

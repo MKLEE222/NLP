@@ -1,0 +1,9 @@
+# Third-party components and data
+
+`public_stylegram.py` is an audited excerpt from the embedded Gaussian/StyleGrams component of **Maman Salto (saddamaditya), Name That LLM: Two-Stage LoRA & Hungarian, version1**. The source Notebook credits prvsiyan for its shared-prompt Gaussian component and other public contributors in its source. Original URL: https://www.kaggle.com/code/saddamaditya/name-that-llm-two-stage-lora-hungarian . The Notebook is published under Apache License2.0; the license text is included as `LICENSE-public-components.txt`. The excerpt removes notebook-level data/model execution and preserves the selected function/class definitions. Full-source identity and dependencies are in `reference_manifest.json`.
+
+External data attribution: **seyitkaangunes, Name That LLM — Extra API Passages**, Kaggle dataset version2, https://www.kaggle.com/datasets/seyitkaangunes/ntl-extra-api-passages , Creative Commons Attribution4.0 International, https://creativecommons.org/licenses/by/4.0/ . Passage whitespace is normalized, exact overlaps are filtered and training weights are changed. Data is obtained separately and is not redistributed with the code. Source companion: https://www.kaggle.com/code/seyitkaangunes/does-extra-data-help-ntl-extra-passages .
+
+Local pretrained checkpoint: **Qwen Team, Qwen2.5-7B-Instruct**, https://huggingface.co/Qwen/Qwen2.5-7B-Instruct . Original license remains with the local checkpoint. The experiment truncates the frozen model to20 layers and applies4-bit quantization at loading. It does not redistribute backbone weights.
+
+Official competition data is acquired separately after accepting Kaggle's competition rules. No official passages, external passages, row-level predictions, cached features or model binaries are committed to the public experiment branch.

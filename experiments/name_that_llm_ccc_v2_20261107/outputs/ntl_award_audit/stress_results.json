@@ -1,0 +1,1069 @@
+{
+  "scope": "post-hoc audit of fixed models; no fitting or selection",
+  "summary": {
+    "full": {
+      "rows": 2699,
+      "class_counts": [
+        149,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150
+      ],
+      "BA": {
+        "BASE": 0.5564156102411135,
+        "XGB_FULL": 0.574553815560527,
+        "LGB_FULL": 0.5723266219239374,
+        "WORKSPACE": 0.5649366144668159,
+        "RAW": 0.4178498632861049
+      },
+      "XGB_delta_BASE_95pct": [
+        0.005925925925926001,
+        0.030375341784737775
+      ],
+      "mean_support_coverage": 0.9848113790970933,
+      "mean_XGB_disagreement_with_full_batch": 0.0
+    },
+    "half": {
+      "rows": 1360,
+      "class_counts": [
+        72,
+        72,
+        76,
+        76,
+        65,
+        86,
+        76,
+        69,
+        77,
+        76,
+        72,
+        81,
+        76,
+        72,
+        73,
+        77,
+        86,
+        78
+      ],
+      "BA": {
+        "BASE": 0.527995352990141,
+        "XGB_FULL": 0.5496615571757157,
+        "LGB_FULL": 0.5538808944134744,
+        "WORKSPACE": 0.5396962816422675,
+        "RAW": 0.4195623356424196
+      },
+      "XGB_delta_BASE_95pct": [
+        0.00619023142714159,
+        0.03831523919238345
+      ],
+      "mean_support_coverage": 0.9805332549221639,
+      "mean_XGB_disagreement_with_full_batch": 0.20385551330322865
+    },
+    "thin20": {
+      "rows": 562,
+      "class_counts": [
+        26,
+        41,
+        29,
+        31,
+        29,
+        27,
+        29,
+        32,
+        29,
+        32,
+        35,
+        35,
+        35,
+        37,
+        30,
+        25,
+        24,
+        36
+      ],
+      "BA": {
+        "BASE": 0.47547294816920105,
+        "XGB_FULL": 0.4888026442903342,
+        "LGB_FULL": 0.5044208378356491,
+        "WORKSPACE": 0.48122532331812784,
+        "RAW": 0.44914489970087346
+      },
+      "XGB_delta_BASE_95pct": [
+        -0.013042429699640899,
+        0.03884249963792996
+      ],
+      "mean_support_coverage": 0.9352690684701038,
+      "mean_XGB_disagreement_with_full_batch": 0.3531070880164927
+    },
+    "label_shift": {
+      "rows": 1344,
+      "class_counts": [
+        39,
+        41,
+        33,
+        39,
+        29,
+        35,
+        38,
+        33,
+        34,
+        123,
+        106,
+        113,
+        117,
+        115,
+        117,
+        106,
+        110,
+        116
+      ],
+      "BA": {
+        "BASE": 0.5410447844105049,
+        "XGB_FULL": 0.568247287123741,
+        "LGB_FULL": 0.5720141426383933,
+        "WORKSPACE": 0.5502567559629384,
+        "RAW": 0.43524954282508843
+      },
+      "XGB_delta_BASE_95pct": [
+        0.01089379943524253,
+        0.04392078733252175
+      ],
+      "mean_support_coverage": 0.9757447263742056,
+      "mean_XGB_disagreement_with_full_batch": 0.2808413090950498
+    },
+    "claude_sparse": {
+      "rows": 1824,
+      "class_counts": [
+        12,
+        12,
+        14,
+        13,
+        14,
+        140,
+        136,
+        127,
+        142,
+        137,
+        136,
+        134,
+        131,
+        141,
+        135,
+        133,
+        131,
+        136
+      ],
+      "BA": {
+        "BASE": 0.5416453335882637,
+        "XGB_FULL": 0.5556249502997065,
+        "LGB_FULL": 0.5574998233931567,
+        "WORKSPACE": 0.5462600348744571,
+        "RAW": 0.40660175744311705
+      },
+      "XGB_delta_BASE_95pct": [
+        -0.005424680525592318,
+        0.034281971611146635
+      ],
+      "mean_support_coverage": 0.981537719752365,
+      "mean_XGB_disagreement_with_full_batch": 0.16646181804076488
+    },
+    "claude_dense": {
+      "rows": 880,
+      "class_counts": [
+        135,
+        134,
+        135,
+        133,
+        133,
+        13,
+        18,
+        16,
+        18,
+        18,
+        11,
+        24,
+        13,
+        17,
+        16,
+        12,
+        16,
+        18
+      ],
+      "BA": {
+        "BASE": 0.5135964408863329,
+        "XGB_FULL": 0.5389150085365537,
+        "LGB_FULL": 0.5352354207024675,
+        "WORKSPACE": 0.5196265714329741,
+        "RAW": 0.4202175437285042
+      },
+      "XGB_delta_BASE_95pct": [
+        -0.002964410345527121,
+        0.05503457027827933
+      ],
+      "mean_support_coverage": 0.980686391735385,
+      "mean_XGB_disagreement_with_full_batch": 0.31349731173101003
+    },
+    "one_per_prompt": {
+      "rows": 150,
+      "class_counts": [
+        10,
+        16,
+        7,
+        9,
+        8,
+        10,
+        13,
+        5,
+        8,
+        5,
+        9,
+        4,
+        6,
+        8,
+        6,
+        10,
+        7,
+        9
+      ],
+      "BA": {
+        "BASE": 0.4156610364943698,
+        "XGB_FULL": 0.41256359381359375,
+        "LGB_FULL": 0.39995675620675614,
+        "WORKSPACE": 0.4156610364943698,
+        "RAW": 0.4156610364943698
+      },
+      "XGB_delta_BASE_95pct": [
+        -0.047555528657502406,
+        0.04141544412377747
+      ],
+      "mean_support_coverage": 0.053333333333333344,
+      "mean_XGB_disagreement_with_full_batch": 0.4533333333333333
+    },
+    "chunks32": {
+      "rows": 2699,
+      "class_counts": [
+        149,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150
+      ],
+      "BA": {
+        "BASE": 0.4045364156102411,
+        "XGB_FULL": 0.4230375341784738,
+        "LGB_FULL": 0.42339299030574196,
+        "WORKSPACE": 0.40860551826994784,
+        "RAW": 0.4178498632861049
+      },
+      "XGB_delta_BASE_95pct": [
+        0.006296296296296244,
+        0.032230487198608035
+      ],
+      "mean_support_coverage": 0.6043028928743215,
+      "mean_XGB_disagreement_with_full_batch": 0.4820174534460249
+    },
+    "chunks8": {
+      "rows": 2699,
+      "class_counts": [
+        149,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150
+      ],
+      "BA": {
+        "BASE": 0.40489187173750935,
+        "XGB_FULL": 0.42820034799900575,
+        "LGB_FULL": 0.4237484464330102,
+        "WORKSPACE": 0.4067437235893612,
+        "RAW": 0.4178498632861049
+      },
+      "XGB_delta_BASE_95pct": [
+        0.012592592592592653,
+        0.035193698732289294
+      ],
+      "mean_support_coverage": 0.197847866419295,
+      "mean_XGB_disagreement_with_full_batch": 0.4786799972514258
+    },
+    "singleton": {
+      "rows": 2699,
+      "class_counts": [
+        149,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150,
+        150
+      ],
+      "BA": {
+        "BASE": 0.4178498632861049,
+        "XGB_FULL": 0.4393064876957495,
+        "LGB_FULL": 0.43374347501864274,
+        "WORKSPACE": 0.4178498632861049,
+        "RAW": 0.4178498632861049
+      },
+      "XGB_delta_BASE_95pct": [
+        0.011819219387172404,
+        0.03185185185185185
+      ],
+      "mean_support_coverage": 0.0,
+      "mean_XGB_disagreement_with_full_batch": 0.46163402734831305
+    }
+  },
+  "folds": [
+    {
+      "fold": 1,
+      "scenario": "full",
+      "rows": 540,
+      "BA": {
+        "BASE": 0.5277777777777778,
+        "XGB_FULL": 0.5296296296296296,
+        "LGB_FULL": 0.538888888888889,
+        "WORKSPACE": 0.5351851851851852,
+        "RAW": 0.4037037037037037
+      },
+      "support_coverage": 0.9722222222222222,
+      "XGB_disagreement_with_full_batch": 0.0
+    },
+    {
+      "fold": 1,
+      "scenario": "half",
+      "rows": 253,
+      "BA": {
+        "BASE": 0.4649229991141756,
+        "XGB_FULL": 0.49935882472647175,
+        "LGB_FULL": 0.48710811247575947,
+        "WORKSPACE": 0.48823828676769854,
+        "RAW": 0.3842867916397328
+      },
+      "support_coverage": 0.9565217391304348,
+      "XGB_disagreement_with_full_batch": 0.2608695652173913
+    },
+    {
+      "fold": 1,
+      "scenario": "thin20",
+      "rows": 105,
+      "BA": {
+        "BASE": 0.46382275132275136,
+        "XGB_FULL": 0.47493386243386243,
+        "LGB_FULL": 0.5347222222222222,
+        "WORKSPACE": 0.48048941798941797,
+        "RAW": 0.4798059964726631
+      },
+      "support_coverage": 0.9142857142857143,
+      "XGB_disagreement_with_full_batch": 0.37142857142857144
+    },
+    {
+      "fold": 1,
+      "scenario": "label_shift",
+      "rows": 255,
+      "BA": {
+        "BASE": 0.49811039174120786,
+        "XGB_FULL": 0.5382619287653613,
+        "LGB_FULL": 0.5384049687634738,
+        "WORKSPACE": 0.513951776604332,
+        "RAW": 0.4390177663537693
+      },
+      "support_coverage": 0.9607843137254902,
+      "XGB_disagreement_with_full_batch": 0.30980392156862746
+    },
+    {
+      "fold": 1,
+      "scenario": "claude_sparse",
+      "rows": 369,
+      "BA": {
+        "BASE": 0.48439024009905235,
+        "XGB_FULL": 0.48285892056007007,
+        "LGB_FULL": 0.5086128147430828,
+        "WORKSPACE": 0.4771789647843288,
+        "RAW": 0.3242140525857
+      },
+      "support_coverage": 0.959349593495935,
+      "XGB_disagreement_with_full_batch": 0.17344173441734417
+    },
+    {
+      "fold": 1,
+      "scenario": "claude_dense",
+      "rows": 177,
+      "BA": {
+        "BASE": 0.4327262243928911,
+        "XGB_FULL": 0.38745308189752636,
+        "LGB_FULL": 0.4089020033464477,
+        "WORKSPACE": 0.4119239813684258,
+        "RAW": 0.3376000542667209
+      },
+      "support_coverage": 0.9661016949152542,
+      "XGB_disagreement_with_full_batch": 0.3107344632768362
+    },
+    {
+      "fold": 1,
+      "scenario": "one_per_prompt",
+      "rows": 30,
+      "BA": {
+        "BASE": 0.5444444444444444,
+        "XGB_FULL": 0.5444444444444444,
+        "LGB_FULL": 0.5666666666666667,
+        "WORKSPACE": 0.5444444444444444,
+        "RAW": 0.5444444444444444
+      },
+      "support_coverage": 0.06666666666666667,
+      "XGB_disagreement_with_full_batch": 0.3333333333333333
+    },
+    {
+      "fold": 1,
+      "scenario": "chunks32",
+      "rows": 540,
+      "BA": {
+        "BASE": 0.3814814814814815,
+        "XGB_FULL": 0.39444444444444443,
+        "LGB_FULL": 0.3925925925925926,
+        "WORKSPACE": 0.374074074074074,
+        "RAW": 0.4037037037037037
+      },
+      "support_coverage": 0.5925925925925926,
+      "XGB_disagreement_with_full_batch": 0.48518518518518516
+    },
+    {
+      "fold": 1,
+      "scenario": "chunks8",
+      "rows": 540,
+      "BA": {
+        "BASE": 0.37407407407407406,
+        "XGB_FULL": 0.4000000000000001,
+        "LGB_FULL": 0.38703703703703707,
+        "WORKSPACE": 0.37222222222222223,
+        "RAW": 0.4037037037037037
+      },
+      "support_coverage": 0.2111111111111111,
+      "XGB_disagreement_with_full_batch": 0.4981481481481482
+    },
+    {
+      "fold": 1,
+      "scenario": "singleton",
+      "rows": 540,
+      "BA": {
+        "BASE": 0.4037037037037037,
+        "XGB_FULL": 0.4222222222222222,
+        "LGB_FULL": 0.4148148148148148,
+        "WORKSPACE": 0.4037037037037037,
+        "RAW": 0.4037037037037037
+      },
+      "support_coverage": 0.0,
+      "XGB_disagreement_with_full_batch": 0.4740740740740741
+    },
+    {
+      "fold": 2,
+      "scenario": "full",
+      "rows": 540,
+      "BA": {
+        "BASE": 0.5981481481481481,
+        "XGB_FULL": 0.6,
+        "LGB_FULL": 0.5962962962962962,
+        "WORKSPACE": 0.6037037037037036,
+        "RAW": 0.39999999999999997
+      },
+      "support_coverage": 0.9925925925925926,
+      "XGB_disagreement_with_full_batch": 0.0
+    },
+    {
+      "fold": 2,
+      "scenario": "half",
+      "rows": 268,
+      "BA": {
+        "BASE": 0.5496770119190141,
+        "XGB_FULL": 0.5782441522186104,
+        "LGB_FULL": 0.5870046534133222,
+        "WORKSPACE": 0.575253513017961,
+        "RAW": 0.40573430267702704
+      },
+      "support_coverage": 0.9888059701492538,
+      "XGB_disagreement_with_full_batch": 0.1865671641791045
+    },
+    {
+      "fold": 2,
+      "scenario": "thin20",
+      "rows": 122,
+      "BA": {
+        "BASE": 0.48384038800705464,
+        "XGB_FULL": 0.5084656084656084,
+        "LGB_FULL": 0.518937389770723,
+        "WORKSPACE": 0.48207671957671955,
+        "RAW": 0.3598324514991182
+      },
+      "support_coverage": 0.9590163934426229,
+      "XGB_disagreement_with_full_batch": 0.3360655737704918
+    },
+    {
+      "fold": 2,
+      "scenario": "label_shift",
+      "rows": 293,
+      "BA": {
+        "BASE": 0.577628553232418,
+        "XGB_FULL": 0.5820640108683587,
+        "LGB_FULL": 0.5973078965228723,
+        "WORKSPACE": 0.5860028703627738,
+        "RAW": 0.4188676460415591
+      },
+      "support_coverage": 0.9897610921501706,
+      "XGB_disagreement_with_full_batch": 0.24232081911262798
+    },
+    {
+      "fold": 2,
+      "scenario": "claude_sparse",
+      "rows": 355,
+      "BA": {
+        "BASE": 0.5850778246746929,
+        "XGB_FULL": 0.5953167167264285,
+        "LGB_FULL": 0.6093698026173455,
+        "WORKSPACE": 0.5972535225400459,
+        "RAW": 0.41115058872680055
+      },
+      "support_coverage": 0.9971830985915493,
+      "XGB_disagreement_with_full_batch": 0.16056338028169015
+    },
+    {
+      "fold": 2,
+      "scenario": "claude_dense",
+      "rows": 178,
+      "BA": {
+        "BASE": 0.5774636243386243,
+        "XGB_FULL": 0.6201223544973544,
+        "LGB_FULL": 0.6201223544973544,
+        "WORKSPACE": 0.617146164021164,
+        "RAW": 0.36400462962962965
+      },
+      "support_coverage": 0.9775280898876404,
+      "XGB_disagreement_with_full_batch": 0.21910112359550563
+    },
+    {
+      "fold": 2,
+      "scenario": "one_per_prompt",
+      "rows": 30,
+      "BA": {
+        "BASE": 0.4444444444444444,
+        "XGB_FULL": 0.4611111111111111,
+        "LGB_FULL": 0.4111111111111111,
+        "WORKSPACE": 0.4444444444444444,
+        "RAW": 0.4444444444444444
+      },
+      "support_coverage": 0.0,
+      "XGB_disagreement_with_full_batch": 0.5333333333333333
+    },
+    {
+      "fold": 2,
+      "scenario": "chunks32",
+      "rows": 540,
+      "BA": {
+        "BASE": 0.41481481481481475,
+        "XGB_FULL": 0.44814814814814813,
+        "LGB_FULL": 0.4555555555555555,
+        "WORKSPACE": 0.41851851851851846,
+        "RAW": 0.39999999999999997
+      },
+      "support_coverage": 0.6055555555555555,
+      "XGB_disagreement_with_full_batch": 0.45185185185185184
+    },
+    {
+      "fold": 2,
+      "scenario": "chunks8",
+      "rows": 540,
+      "BA": {
+        "BASE": 0.3814814814814815,
+        "XGB_FULL": 0.44074074074074077,
+        "LGB_FULL": 0.42592592592592593,
+        "WORKSPACE": 0.3851851851851852,
+        "RAW": 0.39999999999999997
+      },
+      "support_coverage": 0.19814814814814816,
+      "XGB_disagreement_with_full_batch": 0.4962962962962963
+    },
+    {
+      "fold": 2,
+      "scenario": "singleton",
+      "rows": 540,
+      "BA": {
+        "BASE": 0.39999999999999997,
+        "XGB_FULL": 0.44814814814814813,
+        "LGB_FULL": 0.43518518518518523,
+        "WORKSPACE": 0.39999999999999997,
+        "RAW": 0.39999999999999997
+      },
+      "support_coverage": 0.0,
+      "XGB_disagreement_with_full_batch": 0.49074074074074076
+    },
+    {
+      "fold": 3,
+      "scenario": "full",
+      "rows": 539,
+      "BA": {
+        "BASE": 0.5729885057471265,
+        "XGB_FULL": 0.6156449553001276,
+        "LGB_FULL": 0.5969987228607918,
+        "WORKSPACE": 0.5990421455938697,
+        "RAW": 0.44291187739463606
+      },
+      "support_coverage": 0.9907235621521335,
+      "XGB_disagreement_with_full_batch": 0.0
+    },
+    {
+      "fold": 3,
+      "scenario": "half",
+      "rows": 270,
+      "BA": {
+        "BASE": 0.5727963043817017,
+        "XGB_FULL": 0.581497069274417,
+        "LGB_FULL": 0.5894864053597284,
+        "WORKSPACE": 0.588511399018365,
+        "RAW": 0.4603487191915985
+      },
+      "support_coverage": 0.9925925925925926,
+      "XGB_disagreement_with_full_batch": 0.21481481481481482
+    },
+    {
+      "fold": 3,
+      "scenario": "thin20",
+      "rows": 114,
+      "BA": {
+        "BASE": 0.5541225749559083,
+        "XGB_FULL": 0.5568783068783069,
+        "LGB_FULL": 0.5630511463844797,
+        "WORKSPACE": 0.5713183421516755,
+        "RAW": 0.4888007054673722
+      },
+      "support_coverage": 0.9298245614035088,
+      "XGB_disagreement_with_full_batch": 0.30701754385964913
+    },
+    {
+      "fold": 3,
+      "scenario": "label_shift",
+      "rows": 249,
+      "BA": {
+        "BASE": 0.5121789881305517,
+        "XGB_FULL": 0.5378336551010083,
+        "LGB_FULL": 0.5758362299761994,
+        "WORKSPACE": 0.5109055045019957,
+        "RAW": 0.46829402411019494
+      },
+      "support_coverage": 0.9759036144578314,
+      "XGB_disagreement_with_full_batch": 0.285140562248996
+    },
+    {
+      "fold": 3,
+      "scenario": "claude_sparse",
+      "rows": 362,
+      "BA": {
+        "BASE": 0.5995409550007251,
+        "XGB_FULL": 0.589897852254174,
+        "LGB_FULL": 0.6194228274209117,
+        "WORKSPACE": 0.6100059724580797,
+        "RAW": 0.4929883459098018
+      },
+      "support_coverage": 0.994475138121547,
+      "XGB_disagreement_with_full_batch": 0.1270718232044199
+    },
+    {
+      "fold": 3,
+      "scenario": "claude_dense",
+      "rows": 167,
+      "BA": {
+        "BASE": 0.613496563005975,
+        "XGB_FULL": 0.6651880629350226,
+        "LGB_FULL": 0.6207436184905784,
+        "WORKSPACE": 0.6491203406233391,
+        "RAW": 0.4831122820424003
+      },
+      "support_coverage": 0.9880239520958084,
+      "XGB_disagreement_with_full_batch": 0.31137724550898205
+    },
+    {
+      "fold": 3,
+      "scenario": "one_per_prompt",
+      "rows": 30,
+      "BA": {
+        "BASE": 0.38541666666666663,
+        "XGB_FULL": 0.3020833333333333,
+        "LGB_FULL": 0.3020833333333333,
+        "WORKSPACE": 0.38541666666666663,
+        "RAW": 0.38541666666666663
+      },
+      "support_coverage": 0.0,
+      "XGB_disagreement_with_full_batch": 0.5333333333333333
+    },
+    {
+      "fold": 3,
+      "scenario": "chunks32",
+      "rows": 539,
+      "BA": {
+        "BASE": 0.4525542784163474,
+        "XGB_FULL": 0.44878671775223494,
+        "LGB_FULL": 0.45427841634738186,
+        "WORKSPACE": 0.4562579821200511,
+        "RAW": 0.44291187739463606
+      },
+      "support_coverage": 0.6178107606679035,
+      "XGB_disagreement_with_full_batch": 0.44712430426716143
+    },
+    {
+      "fold": 3,
+      "scenario": "chunks8",
+      "rows": 539,
+      "BA": {
+        "BASE": 0.44291187739463606,
+        "XGB_FULL": 0.4503192848020434,
+        "LGB_FULL": 0.4594508301404853,
+        "WORKSPACE": 0.43920817369093235,
+        "RAW": 0.44291187739463606
+      },
+      "support_coverage": 0.18923933209647495,
+      "XGB_disagreement_with_full_batch": 0.4359925788497217
+    },
+    {
+      "fold": 3,
+      "scenario": "singleton",
+      "rows": 539,
+      "BA": {
+        "BASE": 0.44291187739463606,
+        "XGB_FULL": 0.4559386973180076,
+        "LGB_FULL": 0.4502554278416347,
+        "WORKSPACE": 0.44291187739463606,
+        "RAW": 0.44291187739463606
+      },
+      "support_coverage": 0.0,
+      "XGB_disagreement_with_full_batch": 0.41187384044526903
+    },
+    {
+      "fold": 4,
+      "scenario": "full",
+      "rows": 540,
+      "BA": {
+        "BASE": 0.5314814814814814,
+        "XGB_FULL": 0.5518518518518518,
+        "LGB_FULL": 0.5518518518518518,
+        "WORKSPACE": 0.5314814814814814,
+        "RAW": 0.437037037037037
+      },
+      "support_coverage": 0.9833333333333333,
+      "XGB_disagreement_with_full_batch": 0.0
+    },
+    {
+      "fold": 4,
+      "scenario": "half",
+      "rows": 300,
+      "BA": {
+        "BASE": 0.5139304867246044,
+        "XGB_FULL": 0.5374145099635296,
+        "LGB_FULL": 0.5514619594276458,
+        "WORKSPACE": 0.5245727992051522,
+        "RAW": 0.4394554972986346
+      },
+      "support_coverage": 0.9833333333333333,
+      "XGB_disagreement_with_full_batch": 0.16
+    },
+    {
+      "fold": 4,
+      "scenario": "thin20",
+      "rows": 110,
+      "BA": {
+        "BASE": 0.42380952380952386,
+        "XGB_FULL": 0.4038359788359788,
+        "LGB_FULL": 0.3982804232804233,
+        "WORKSPACE": 0.4168650793650794,
+        "RAW": 0.4974867724867724
+      },
+      "support_coverage": 0.9272727272727272,
+      "XGB_disagreement_with_full_batch": 0.36363636363636365
+    },
+    {
+      "fold": 4,
+      "scenario": "label_shift",
+      "rows": 278,
+      "BA": {
+        "BASE": 0.5171321383036358,
+        "XGB_FULL": 0.5576357579618448,
+        "LGB_FULL": 0.5267727691882281,
+        "WORKSPACE": 0.5179882780486645,
+        "RAW": 0.44251591939997736
+      },
+      "support_coverage": 0.9820143884892086,
+      "XGB_disagreement_with_full_batch": 0.27697841726618705
+    },
+    {
+      "fold": 4,
+      "scenario": "claude_sparse",
+      "rows": 372,
+      "BA": {
+        "BASE": 0.5002791773289856,
+        "XGB_FULL": 0.5274911465716063,
+        "LGB_FULL": 0.5128569011519203,
+        "WORKSPACE": 0.514399752369101,
+        "RAW": 0.403945728600901
+      },
+      "support_coverage": 0.9758064516129032,
+      "XGB_disagreement_with_full_batch": 0.1881720430107527
+    },
+    {
+      "fold": 4,
+      "scenario": "claude_dense",
+      "rows": 176,
+      "BA": {
+        "BASE": 0.44132848275360353,
+        "XGB_FULL": 0.47579522374208366,
+        "LGB_FULL": 0.47564259858945845,
+        "WORKSPACE": 0.4373602287853495,
+        "RAW": 0.4061432484137798
+      },
+      "support_coverage": 0.9772727272727273,
+      "XGB_disagreement_with_full_batch": 0.36363636363636365
+    },
+    {
+      "fold": 4,
+      "scenario": "one_per_prompt",
+      "rows": 30,
+      "BA": {
+        "BASE": 0.46875,
+        "XGB_FULL": 0.46875,
+        "LGB_FULL": 0.46875,
+        "WORKSPACE": 0.46875,
+        "RAW": 0.46875
+      },
+      "support_coverage": 0.1,
+      "XGB_disagreement_with_full_batch": 0.3333333333333333
+    },
+    {
+      "fold": 4,
+      "scenario": "chunks32",
+      "rows": 540,
+      "BA": {
+        "BASE": 0.38518518518518513,
+        "XGB_FULL": 0.412962962962963,
+        "LGB_FULL": 0.40185185185185185,
+        "WORKSPACE": 0.3925925925925926,
+        "RAW": 0.437037037037037
+      },
+      "support_coverage": 0.6148148148148148,
+      "XGB_disagreement_with_full_batch": 0.4888888888888889
+    },
+    {
+      "fold": 4,
+      "scenario": "chunks8",
+      "rows": 540,
+      "BA": {
+        "BASE": 0.4222222222222222,
+        "XGB_FULL": 0.437037037037037,
+        "LGB_FULL": 0.43333333333333335,
+        "WORKSPACE": 0.4259259259259259,
+        "RAW": 0.437037037037037
+      },
+      "support_coverage": 0.19074074074074074,
+      "XGB_disagreement_with_full_batch": 0.4388888888888889
+    },
+    {
+      "fold": 4,
+      "scenario": "singleton",
+      "rows": 540,
+      "BA": {
+        "BASE": 0.437037037037037,
+        "XGB_FULL": 0.4574074074074074,
+        "LGB_FULL": 0.45185185185185184,
+        "WORKSPACE": 0.437037037037037,
+        "RAW": 0.437037037037037
+      },
+      "support_coverage": 0.0,
+      "XGB_disagreement_with_full_batch": 0.4222222222222222
+    },
+    {
+      "fold": 5,
+      "scenario": "full",
+      "rows": 540,
+      "BA": {
+        "BASE": 0.5518518518518518,
+        "XGB_FULL": 0.5759259259259258,
+        "LGB_FULL": 0.5777777777777778,
+        "WORKSPACE": 0.5555555555555555,
+        "RAW": 0.4055555555555556
+      },
+      "support_coverage": 0.9851851851851852,
+      "XGB_disagreement_with_full_batch": 0.0
+    },
+    {
+      "fold": 5,
+      "scenario": "half",
+      "rows": 269,
+      "BA": {
+        "BASE": 0.5301511990918932,
+        "XGB_FULL": 0.5538212839509559,
+        "LGB_FULL": 0.5594085207881928,
+        "WORKSPACE": 0.5251678889026333,
+        "RAW": 0.40527403300572634
+      },
+      "support_coverage": 0.9814126394052045,
+      "XGB_disagreement_with_full_batch": 0.1970260223048327
+    },
+    {
+      "fold": 5,
+      "scenario": "thin20",
+      "rows": 111,
+      "BA": {
+        "BASE": 0.4370751162417829,
+        "XGB_FULL": 0.49304753888087216,
+        "LGB_FULL": 0.5060345518678852,
+        "WORKSPACE": 0.4450998075998076,
+        "RAW": 0.41387686387686384
+      },
+      "support_coverage": 0.9459459459459459,
+      "XGB_disagreement_with_full_batch": 0.38738738738738737
+    },
+    {
+      "fold": 5,
+      "scenario": "label_shift",
+      "rows": 269,
+      "BA": {
+        "BASE": 0.6072512565266188,
+        "XGB_FULL": 0.6411867118388856,
+        "LGB_FULL": 0.6205052596356945,
+        "WORKSPACE": 0.6179579612550626,
+        "RAW": 0.4200884796899289
+      },
+      "support_coverage": 0.9702602230483272,
+      "XGB_disagreement_with_full_batch": 0.2899628252788104
+    },
+    {
+      "fold": 5,
+      "scenario": "claude_sparse",
+      "rows": 366,
+      "BA": {
+        "BASE": 0.5400047758567028,
+        "XGB_FULL": 0.5697326056859524,
+        "LGB_FULL": 0.5436336220311879,
+        "WORKSPACE": 0.5415663200145959,
+        "RAW": 0.3838809470148212
+      },
+      "support_coverage": 0.9808743169398907,
+      "XGB_disagreement_with_full_batch": 0.1830601092896175
+    },
+    {
+      "fold": 5,
+      "scenario": "claude_dense",
+      "rows": 182,
+      "BA": {
+        "BASE": 0.5080482307865675,
+        "XGB_FULL": 0.5300112688753662,
+        "LGB_FULL": 0.5250074589222662,
+        "WORKSPACE": 0.49388701074299446,
+        "RAW": 0.4340062461766316
+      },
+      "support_coverage": 0.9945054945054945,
+      "XGB_disagreement_with_full_batch": 0.3626373626373626
+    },
+    {
+      "fold": 5,
+      "scenario": "one_per_prompt",
+      "rows": 30,
+      "BA": {
+        "BASE": 0.38571428571428573,
+        "XGB_FULL": 0.43928571428571433,
+        "LGB_FULL": 0.425,
+        "WORKSPACE": 0.38571428571428573,
+        "RAW": 0.38571428571428573
+      },
+      "support_coverage": 0.1,
+      "XGB_disagreement_with_full_batch": 0.5333333333333333
+    },
+    {
+      "fold": 5,
+      "scenario": "chunks32",
+      "rows": 540,
+      "BA": {
+        "BASE": 0.3888888888888889,
+        "XGB_FULL": 0.4111111111111111,
+        "LGB_FULL": 0.4129629629629629,
+        "WORKSPACE": 0.40185185185185185,
+        "RAW": 0.4055555555555556
+      },
+      "support_coverage": 0.5907407407407408,
+      "XGB_disagreement_with_full_batch": 0.5370370370370371
+    },
+    {
+      "fold": 5,
+      "scenario": "chunks8",
+      "rows": 540,
+      "BA": {
+        "BASE": 0.4037037037037037,
+        "XGB_FULL": 0.412962962962963,
+        "LGB_FULL": 0.4129629629629629,
+        "WORKSPACE": 0.41111111111111115,
+        "RAW": 0.4055555555555556
+      },
+      "support_coverage": 0.2,
+      "XGB_disagreement_with_full_batch": 0.524074074074074
+    },
+    {
+      "fold": 5,
+      "scenario": "singleton",
+      "rows": 540,
+      "BA": {
+        "BASE": 0.4055555555555556,
+        "XGB_FULL": 0.4129629629629629,
+        "LGB_FULL": 0.41666666666666663,
+        "WORKSPACE": 0.4055555555555556,
+        "RAW": 0.4055555555555556
+      },
+      "support_coverage": 0.0,
+      "XGB_disagreement_with_full_batch": 0.5092592592592593
+    }
+  ],
+  "singleton_vectorization_verified": true,
+  "seconds": 20.48
+}

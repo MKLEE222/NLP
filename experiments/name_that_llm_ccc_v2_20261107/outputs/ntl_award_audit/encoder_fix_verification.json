@@ -1,0 +1,7 @@
+{
+  "anchor_mean_relative_feature_error": 0.0,
+  "wrong_backbone_rejected_before_cache": true,
+  "cache_content_hash_verified": true,
+  "manifest": "C:\\Users\\25317\\Documents\\Codex\\2026-11-07\\referenced-chatgpt-conversation-this-is-an\\outputs\\ntl_workspace_v4\\verified_encoder_manifest.json",
+  "scope": "deployment identity repair; no prediction retraining"
+}

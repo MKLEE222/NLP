@@ -1,0 +1,132 @@
+{
+  "status": "COMPLETE",
+  "data_sha256": "7c375db7dfeea6b36cefc7b48a290dd48c54c7fe03bfd402390728a6a2bb9386",
+  "source": "saddamaditya/name-that-llm-two-stage-lora-hungarian v1 embedded StyleGrams",
+  "external": {
+    "source": "seyitkaangunes/ntl-extra-api-passages",
+    "version": 2,
+    "license": "CC BY 4.0",
+    "archive_sha256": "6fd3ae76c806cdf0f53f10e94e15993e2232564bac4a0f63e13f530309d1df6a",
+    "raw_rows": 4998,
+    "used_rows": 4998,
+    "exact_normalized_official_overlap_removed": 0,
+    "class_counts": {
+      "claude-opus-4-6": 1000,
+      "claude-opus-5": 1000,
+      "claude-opus-4-8": 1000,
+      "claude-sonnet-5": 1000,
+      "claude-fable-5": 998
+    },
+    "source_claim": "fresh prompt bank; semantic prompt disjointness is author-reported, not proven by ID difference"
+  },
+  "folds": [
+    {
+      "fold": 1,
+      "BA": {
+        "P0": 0.3592592592592593,
+        "P1": 0.37777777777777777,
+        "P2": 0.4314814814814814
+      },
+      "group_ARI": 0.9268018236492386,
+      "centred_coverage": 0.9722222222222222,
+      "external_weight_class_totals_equal_official": true
+    },
+    {
+      "fold": 2,
+      "BA": {
+        "P0": 0.36296296296296293,
+        "P1": 0.3796296296296296,
+        "P2": 0.4092592592592592
+      },
+      "group_ARI": 0.9477311308828664,
+      "centred_coverage": 0.9925925925925926,
+      "external_weight_class_totals_equal_official": true
+    },
+    {
+      "fold": 3,
+      "BA": {
+        "P0": 0.37611749680715195,
+        "P1": 0.3985312899106003,
+        "P2": 0.4540229885057471
+      },
+      "group_ARI": 0.9667038318434864,
+      "centred_coverage": 0.9907235621521335,
+      "external_weight_class_totals_equal_official": true
+    },
+    {
+      "fold": 4,
+      "BA": {
+        "P0": 0.3851851851851852,
+        "P1": 0.40740740740740733,
+        "P2": 0.4592592592592593
+      },
+      "group_ARI": 0.9650343591694316,
+      "centred_coverage": 0.9833333333333333,
+      "external_weight_class_totals_equal_official": true
+    },
+    {
+      "fold": 5,
+      "BA": {
+        "P0": 0.3685185185185185,
+        "P1": 0.3759259259259259,
+        "P2": 0.42037037037037034
+      },
+      "group_ARI": 0.9494611846397462,
+      "centred_coverage": 0.9851851851851852,
+      "external_weight_class_totals_equal_official": true
+    }
+  ],
+  "OOF_BA": {
+    "P0": 0.3704151130996769,
+    "P1": 0.3878598061148396,
+    "P2": 0.4348645289584887,
+    "V2": 0.35929157345264723
+  },
+  "intervals": {
+    "P0": {
+      "BA_95pct": [
+        0.35197161447161446,
+        0.3892969177230923
+      ],
+      "delta_V2_95pct": [
+        -0.005866658296428124,
+        0.02820162509448227
+      ],
+      "lower_adjusted": -0.009001751751751746
+    },
+    "P1": {
+      "BA_95pct": [
+        0.37,
+        0.4059282252050708
+      ],
+      "delta_V2_95pct": [
+        0.01036398898898898,
+        0.04629629629629628
+      ],
+      "lower_adjusted": 0.00670558869831797
+    },
+    "P2": {
+      "BA_95pct": [
+        0.4171194699356253,
+        0.453221264367816
+      ],
+      "delta_V2_95pct": [
+        0.05443518518518515,
+        0.09703772060651265
+      ],
+      "lower_adjusted": 0.050238731460767204
+    },
+    "V2": {
+      "BA_95pct": [
+        0.34373601789709174,
+        0.37559545115585374
+      ],
+      "delta_V2_95pct": [
+        0.0,
+        0.0
+      ],
+      "lower_adjusted": 0.0
+    }
+  },
+  "seconds": 358.28
+}
